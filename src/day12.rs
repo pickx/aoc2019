@@ -128,5 +128,5 @@ pub fn day1(planets: &[Planet]) -> i32 {
 
 #[aoc(day12, part2)]
 pub fn day2(planets: &[Planet]) -> i32 {
-    0
+    unimplemented!()
 }
