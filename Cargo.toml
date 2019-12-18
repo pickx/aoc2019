@@ -1,0 +1,15 @@
+[package]
+name = "aoc2019"
+version = "0.1.0"
+authors = ["y"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+aoc-runner = "0.3.0"
+aoc-runner-derive = "0.3.0"
+itertools = "0.8.2"
+permute = "0.1.0"
+num = "0.2.0"
+scan_fmt = "0.2.4"

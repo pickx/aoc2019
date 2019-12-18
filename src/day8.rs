@@ -1,6 +1,6 @@
-use aoc_runner_derive::{aoc, aoc_generator};
-
 const IMAGE_WIDTH: usize = 25;
+
+use aoc_runner_derive::{aoc, aoc_generator};
 const IMAGE_HEIGHT: usize = 6;
 
 #[derive(Debug)]
@@ -67,6 +67,7 @@ impl Image {
         Layer::new(&final_layer_pixels, self.width, self.height)
     }
 
+    #[allow(dead_code)]
     pub fn print(&self) {
         self.generate_final_layer()
             .pixels()
@@ -131,8 +132,8 @@ pub fn part1(pixels: &[u32]) -> usize {
 #[aoc(day8, part2)]
 pub fn part2(pixels: &[u32]) -> String {
 
-    let image = Image::new(pixels, IMAGE_WIDTH, IMAGE_HEIGHT);
-    //image.print(); //prints "CEKUA"
+    let _image = Image::new(pixels, IMAGE_WIDTH, IMAGE_HEIGHT);
+//    _image.print(); //prints "CEKUA"
 
     "CEKUA".to_string()
 }

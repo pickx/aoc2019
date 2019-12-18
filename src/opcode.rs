@@ -95,6 +95,12 @@ impl CodeRunner {
 
     pub fn output(&self) -> Option<isize> { self.output }
 
+    pub fn value_at_pos_0(&self) -> isize { self.mem[0] }
+
+    pub fn set_noun(&mut self, noun: isize) { self.mem[1] = noun; }
+
+    pub fn set_verb(&mut self, verb: isize) { self.mem[2] = verb; }
+
     pub fn has_halted(&self) -> bool { self.halted }
 
 //    pub fn restart(&mut self, mem: &[isize]) {
