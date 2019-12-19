@@ -79,9 +79,9 @@ impl CodeRunner {
         }
     }
 
-    pub fn clear_output(&mut self) {
-        self.output = None;
-    }
+//    pub fn clear_output(&mut self) {
+//        self.output = None;
+//    }
 
     pub fn push_input_front(&mut self, input: isize) {
         self.inputs.push_front(input);
