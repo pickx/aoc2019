@@ -12,7 +12,7 @@ pub fn input_generator(input: &str) -> Vec<isize> {
 
 pub fn run_with_noun_and_verb(mem: &[isize], noun: isize, verb: isize) -> isize {
 
-    let mut runner = CodeRunner::new(mem);
+    let mut runner = OpcodeRunner::new(mem);
     runner.set_noun(noun);
     runner.set_verb(verb);
 

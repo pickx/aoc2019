@@ -1,15 +1,15 @@
 use std::collections::VecDeque;
 
-#[derive(Eq, PartialEq)]
+#[derive(Eq, PartialEq, Clone)]
 pub enum Opcode {
     Add(Value, Value, usize),      //1
     Mul(Value, Value, usize),      //2
-    Input(usize),                  //3
-    Output(usize),                 //4
+    In(usize),                  //3
+    Out(usize),                 //4
     JumpIfTrue(Value, Value),      //5
     JumpIfFalse(Value, Value),     //6
-    LessThan(Value, Value, usize), //7
-    Equals(Value, Value, usize),   //8
+    LT(Value, Value, usize), //7
+    EQ(Value, Value, usize),   //8
     Halt,                          //99
 }
 
@@ -18,16 +18,16 @@ impl Opcode {
         match self {
             Opcode::Add(_, _, _)
             | Opcode::Mul(_, _, _)
-            | Opcode::LessThan(_, _, _)
-            | Opcode::Equals(_, _, _) => 3,
-            Opcode::Input(_) | Opcode::Output(_) => 1,
+            | Opcode::LT(_, _, _)
+            | Opcode::EQ(_, _, _) => 3,
+            Opcode::In(_) | Opcode::Out(_) => 1,
             Opcode::JumpIfTrue(_, _) | Opcode::JumpIfFalse(_, _) => 2,
             Opcode::Halt => 0,
         }
     }
 }
 
-#[derive(Eq, PartialEq)]
+#[derive(Eq, PartialEq, Clone)]
 pub enum Value {
     Position(usize),  //0
     Immediate(isize), //1
@@ -50,7 +50,7 @@ impl Value {
     }
 }
 
-pub struct CodeRunner {
+pub struct OpcodeRunner {
     mem: Vec<isize>,
     inst_ptr: usize,
     inputs: VecDeque<isize>,
@@ -65,10 +65,10 @@ pub enum InputMode {
     SingleInput,
 }
 
-impl CodeRunner {
+impl OpcodeRunner {
 
-    pub fn new(mem: &[isize]) -> CodeRunner {
-        CodeRunner { mem: mem.to_vec(), inst_ptr: 0, inputs: VecDeque::new(), input_mode: InputMode::ConsumeInput, output: None, halted: false, }
+    pub fn new(mem: &[isize]) -> OpcodeRunner {
+        OpcodeRunner { mem: mem.to_vec(), inst_ptr: 0, inputs: VecDeque::new(), input_mode: InputMode::ConsumeInput, output: None, halted: false, }
     }
 
     fn get_next_input(&mut self) -> isize {
@@ -78,10 +78,6 @@ impl CodeRunner {
             InputMode::SingleInput => self.inputs.back().expect("Input is empty").clone(),
         }
     }
-
-//    pub fn clear_output(&mut self) {
-//        self.output = None;
-//    }
 
     pub fn push_input_front(&mut self, input: isize) {
         self.inputs.push_front(input);
@@ -133,13 +129,13 @@ impl CodeRunner {
             3 => {
                 let dest = self.mem[self.inst_ptr + 1] as usize;
 
-                Opcode::Input(dest)
+                Opcode::In(dest)
             }
 
             4 => {
                 let dest = self.mem[self.inst_ptr + 1] as usize;
 
-                Opcode::Output(dest)
+                Opcode::Out(dest)
             }
 
             5 => {
@@ -161,7 +157,7 @@ impl CodeRunner {
                 let val2 = Value::create(self.mem[self.inst_ptr + 2], (code / 1000) % 10);
                 let dest = self.mem[self.inst_ptr + 3] as usize;
 
-                Opcode::LessThan(val1, val2, dest)
+                Opcode::LT(val1, val2, dest)
             }
 
             8 => {
@@ -169,7 +165,7 @@ impl CodeRunner {
                 let val2 = Value::create(self.mem[self.inst_ptr + 2], (code / 1000) % 10);
                 let dest = self.mem[self.inst_ptr + 3] as usize;
 
-                Opcode::Equals(val1, val2, dest)
+                Opcode::EQ(val1, val2, dest)
             }
 
             99 => Opcode::Halt,
@@ -190,9 +186,9 @@ impl CodeRunner {
                 self.mem[dest] = val1.eval(&self.mem) * val2.eval(&self.mem)
             }
 
-            Opcode::Input(dest) => self.mem[dest] = self.get_next_input(),
+            Opcode::In(dest) => self.mem[dest] = self.get_next_input(),
 
-            Opcode::Output(dest) => self.output = Some(self.mem[dest]),
+            Opcode::Out(dest) => self.output = Some(self.mem[dest]),
 
             Opcode::JumpIfTrue(val1, val2) => {
                 if val1.eval(&self.mem) != 0 {
@@ -206,12 +202,12 @@ impl CodeRunner {
                 }
             }
 
-            Opcode::LessThan(val1, val2, dest) => {
+            Opcode::LT(val1, val2, dest) => {
                 let comparison_res = (val1.eval(&self.mem) < val2.eval(&self.mem)) as isize;
                 self.mem[dest] = comparison_res;
             }
 
-            Opcode::Equals(val1, val2, dest) => {
+            Opcode::EQ(val1, val2, dest) => {
                 let comparison_res = (val1.eval(&self.mem) == val2.eval(&self.mem)) as isize;
                 self.mem[dest] = comparison_res;
             }
