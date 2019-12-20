@@ -15,7 +15,7 @@ fn part1(mem: &[isize]) -> Option<isize> {
     const INPUT: isize = 1;
 
 
-    let mut runner = CodeRunner::new(mem);
+    let mut runner = OpcodeRunner::new(mem);
     runner.set_input_consume_mode(InputMode::SingleInput);
     runner.push_input(INPUT);
 
@@ -32,7 +32,7 @@ fn part2(mem: &[isize]) -> Option<isize> {
 
     const INPUT: isize = 5;
 
-    let mut runner = CodeRunner::new(mem);
+    let mut runner = OpcodeRunner::new(mem);
     runner.set_input_consume_mode(InputMode::SingleInput);
     runner.push_input(INPUT);
 
