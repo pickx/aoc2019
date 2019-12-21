@@ -5,15 +5,14 @@ use aoc_runner_derive::{aoc, aoc_generator};
 pub fn input_generator(input: &str) -> Vec<isize> {
     input
         .split(',')
-        .map(|val| val.parse::<isize>().unwrap())
+        .map(|val| val.parse())
+        .map(|res| res.unwrap())
         .collect()
 }
 
 #[aoc(day5, part1)]
 fn part1(mem: &[isize]) -> Option<isize> {
-
     const INPUT: isize = 1;
-
 
     let mut runner = OpcodeRunner::new(mem);
     runner.set_input_consume_mode(InputMode::SingleInput);
@@ -29,7 +28,6 @@ fn part1(mem: &[isize]) -> Option<isize> {
 
 #[aoc(day5, part2)]
 fn part2(mem: &[isize]) -> Option<isize> {
-
     const INPUT: isize = 5;
 
     let mut runner = OpcodeRunner::new(mem);

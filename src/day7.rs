@@ -1,30 +1,30 @@
 use crate::opcode::*;
 use aoc_runner_derive::{aoc, aoc_generator};
 extern crate permute;
-use permute::permute;
 use itertools::all;
+use permute::permute;
 use std::borrow::BorrowMut;
 
 pub struct Amp {
-    phase: isize,
+    _phase: isize,
     pub runner: OpcodeRunner,
 }
 
 impl Amp {
-
     pub fn new(mem: &[isize], phase: isize) -> Amp {
         let mut runner = OpcodeRunner::new(mem);
         runner.push_input(phase);
-        Amp { phase, runner }
+        Amp {
+            _phase: phase,
+            runner,
+        }
     }
-
 }
-
 
 pub struct AmpChain {
     /// a chain of Amps, each feeding the next one's input in a chain.
     amps: Vec<Amp>,
-//    last_output: Option<isize>,
+    //    last_output: Option<isize>,
     running_amp: usize,
 }
 
@@ -37,7 +37,9 @@ pub enum RunMode {
 impl AmpChain {
     const NUM_AMPS_IN_CHAIN: usize = 5;
 
-    fn num_amps(&self) -> usize { self.amps.len() }
+    fn num_amps(&self) -> usize {
+        self.amps.len()
+    }
 
     pub fn new(amp_phases: &[isize], initial_input: isize, mem: &[isize]) -> AmpChain {
         let num_amps = amp_phases.len();
@@ -46,13 +48,16 @@ impl AmpChain {
         let mut amps: Vec<Amp> = Vec::with_capacity(num_amps);
 
         for &phase in amp_phases {
-            let mut amp = Amp::new(mem, phase);
+            let amp = Amp::new(mem, phase);
             amps.push(amp);
         }
 
         amps[0].runner.push_input_front(initial_input); //pushed in front as a workaround
 
-        AmpChain { amps, running_amp: 0 }
+        AmpChain {
+            amps,
+            running_amp: 0,
+        }
     }
 
     fn current_runner(&mut self) -> &mut OpcodeRunner {
@@ -68,12 +73,10 @@ impl AmpChain {
     }
 
     pub fn run(&mut self, run_mode: RunMode) -> Option<isize> {
-
         let mut last_output = None;
 
         while !self.has_halted() {
-            let runner= self.current_runner();
-
+            let runner = self.current_runner();
 
             if let Some(output) = last_output.take() {
                 runner.push_input_front(output);
@@ -89,7 +92,9 @@ impl AmpChain {
                 }
             }
 
-            if run_mode == RunMode::SinglePass && self.running_amp == self.num_amps() - 1 { break; }
+            if run_mode == RunMode::SinglePass && self.running_amp == self.num_amps() - 1 {
+                break;
+            }
             self.running_amp = self.next_amp();
         }
 
@@ -111,13 +116,12 @@ pub fn day1(mem: &[isize]) -> Option<isize> {
     let mut outputs = Vec::new();
 
     for phase_permutation in amp_phase_permutations {
-        let mut chain = AmpChain::new(&phase_permutation, 0, mem);
+        let mut chain = AmpChain::new(&phase_permutation, initial_input, mem);
         let run_result = chain.run(RunMode::SinglePass);
         if let Some(output) = run_result {
             outputs.push(output);
         }
     }
-
 
     outputs.iter().cloned().max()
 
@@ -126,7 +130,7 @@ pub fn day1(mem: &[isize]) -> Option<isize> {
 
 #[aoc(day7, part2)]
 pub fn day2(mem: &[isize]) -> Option<isize> {
-   let amp_phase_permutations = permute(vec![5, 6, 7, 8, 9]);
+    let amp_phase_permutations = permute(vec![5, 6, 7, 8, 9]);
 
     let initial_input = 0;
 
@@ -140,8 +144,5 @@ pub fn day2(mem: &[isize]) -> Option<isize> {
         }
     }
 
-
-    outputs
-        .iter().cloned().max()
-
+    outputs.iter().cloned().max()
 }

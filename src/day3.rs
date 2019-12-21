@@ -40,9 +40,7 @@ impl Dir {
 
 impl Into<Steps> for &str {
     fn into(self) -> Steps {
-
         let (dir_str, step_count_str) = self.split_at(1);
-
 
         let step_count: usize = step_count_str.parse().expect("Parse error at step count.");
 
@@ -51,17 +49,18 @@ impl Into<Steps> for &str {
             "D" => Dir::D,
             "L" => Dir::L,
             "R" => Dir::R,
-            _ => panic!("Parse error at direction.")
+            _ => panic!("Parse error at direction."),
         };
 
-        Steps { direction: dir, count: step_count }
-
+        Steps {
+            direction: dir,
+            count: step_count,
+        }
     }
 }
 
 #[aoc_generator(day3)]
 fn input_generator(input: &str) -> (Vec<Steps>, Vec<Steps>) {
-
     let (first_path_str, second_path_str): (&str, &str) = input.lines().collect_tuple().unwrap();
 
     let first_path = first_path_str.split(',').map(|str| str.into()).collect();
@@ -76,7 +75,7 @@ fn part1(path_pair: &(Vec<Steps>, Vec<Steps>)) -> usize {
 
     let mut grid = vec![vec![false; GRID_LENGTH]; GRID_HEIGHT];
 
-    let (origin_row, origin_col) = (GRID_HEIGHT/2, GRID_LENGTH/2);
+    let (origin_row, origin_col) = (GRID_HEIGHT / 2, GRID_LENGTH / 2);
 
     let (mut row, mut col) = (origin_row, origin_col);
 
@@ -108,27 +107,23 @@ fn part1(path_pair: &(Vec<Steps>, Vec<Steps>)) -> usize {
     let mut min_dist = usize::max_value();
     for (row, col) in intersections {
         let cur_dist = (row.max(origin_row) - row.min(origin_row))
-                             + (col.max(origin_col) - col.min(origin_col));
+            + (col.max(origin_col) - col.min(origin_col));
 
         if cur_dist > 0 {
             min_dist = min_dist.min(cur_dist);
         }
-
     }
 
-        min_dist
-
+    min_dist
 }
-
 
 #[aoc(day3, part2)]
 fn part2(path_pair: &(Vec<Steps>, Vec<Steps>)) -> usize {
-
     let (first_path, second_path) = path_pair;
 
     let mut grid: Vec<Vec<usize>> = vec![vec![0; GRID_LENGTH]; GRID_HEIGHT];
 
-    let (origin_row, origin_col) = (GRID_HEIGHT/2, GRID_LENGTH/2);
+    let (origin_row, origin_col) = (GRID_HEIGHT / 2, GRID_LENGTH / 2);
 
     let (mut row, mut col) = (origin_row, origin_col);
     let mut step_meter = 0;
@@ -160,4 +155,3 @@ fn part2(path_pair: &(Vec<Steps>, Vec<Steps>)) -> usize {
 
     *(intersections.iter().min().unwrap())
 }
-

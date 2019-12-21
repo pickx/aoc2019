@@ -1,9 +1,9 @@
 use aoc_runner_derive::{aoc, aoc_generator};
 extern crate num;
 use num::Integer;
-use std::collections::{HashSet, HashMap};
-use std::iter::FromIterator;
 use std::cmp::Ordering;
+use std::collections::{HashMap, HashSet};
+use std::iter::FromIterator;
 
 #[derive(Eq, PartialEq, Clone, Hash)]
 pub enum MapLoc {
@@ -25,41 +25,45 @@ type Slope = (isize, isize);
 type Deg = f32;
 type CanonDeg = i64;
 
-    #[derive(Eq, PartialEq, Clone, Hash, Debug)]
-    pub struct Pos {
-        pub x: usize,
-        pub y: usize,
-    }
+#[derive(Eq, PartialEq, Clone, Hash, Debug)]
+pub struct Pos {
+    pub x: usize,
+    pub y: usize,
+}
 
-    impl Pos {
-        fn slope_to(&self, t: &Pos) -> Slope {
-            let x_diff= (self.x as isize) - (t.x as isize);
-            let y_diff = (self.y as isize) - (t.y as isize);
+impl Pos {
+    fn slope_to(&self, t: &Pos) -> Slope {
+        let x_diff = (self.x as isize) - (t.x as isize);
+        let y_diff = (self.y as isize) - (t.y as isize);
 
-            match (x_diff, y_diff) {
-                (0, 0) => (0, 0),
-                (0, _) => (0, y_diff.signum()),
-                (_, 0) => (x_diff.signum(), 0),
-                (_, _) => {
-                    let gcd = x_diff.gcd(&y_diff);
-                    (x_diff / gcd, y_diff / gcd)
-                },
+        match (x_diff, y_diff) {
+            (0, 0) => (0, 0),
+            (0, _) => (0, y_diff.signum()),
+            (_, 0) => (x_diff.signum(), 0),
+            (_, _) => {
+                let gcd = x_diff.gcd(&y_diff);
+                (x_diff / gcd, y_diff / gcd)
             }
         }
+    }
 
-        pub fn enumerate_slopes_to_positions(&self, positions: &Vec<Pos>) -> HashSet<Slope> {
-            let mut slopes = HashSet::from_iter(positions.iter().map(|p| self.slope_to(p)).collect::<Vec<Slope>>());
-            slopes.remove(&(0, 0)); //remove slope with itself
-            slopes
-        }
+    pub fn enumerate_slopes_to_positions(&self, positions: &Vec<Pos>) -> HashSet<Slope> {
+        let mut slopes = HashSet::from_iter(
+            positions
+                .iter()
+                .map(|p| self.slope_to(p))
+                .collect::<Vec<Slope>>(),
+        );
+        slopes.remove(&(0, 0)); //remove slope with itself
+        slopes
+    }
 
-        fn deg_with(&self, t: &Pos) -> Deg {
-            let x = t.x as Deg - self.x as Deg;
-            let y = t.y as Deg - self.y as Deg;
+    fn deg_with(&self, t: &Pos) -> Deg {
+        let x = t.x as Deg - self.x as Deg;
+        let y = t.y as Deg - self.y as Deg;
 
-            x.atan2(y)
-        }
-
+        x.atan2(y)
+    }
 }
 
 //adapted from https://stackoverflow.com/questions/39638363/how-can-i-use-a-hashmap-with-f64-as-key-in-rust
@@ -69,16 +73,13 @@ fn canonicalize(deg: Deg) -> i64 {
     (deg * 1024.0 * 1024.0).round() as i64
 }
 
-
 #[aoc_generator(day10)]
 pub fn input_generator(input: &str) -> Vec<Vec<MapLoc>> {
     let line_to_maploc_vec: fn(&str) -> Vec<MapLoc> =
-        |line| line
-            .chars().map(|c| MapLoc::from(c)).collect();
+        |line| line.chars().map(|c| MapLoc::from(c)).collect();
 
     input.lines().map(line_to_maploc_vec).collect()
 }
-
 
 fn get_asteroid_positions(asteroid_map: &Vec<Vec<MapLoc>>) -> Vec<Pos> {
     let mut asteroid_positions = Vec::new();
@@ -86,7 +87,7 @@ fn get_asteroid_positions(asteroid_map: &Vec<Vec<MapLoc>>) -> Vec<Pos> {
     for (y, row) in asteroid_map.iter().enumerate() {
         for (x, loc) in row.iter().enumerate() {
             if loc == &MapLoc::Asteroid {
-                asteroid_positions.push(Pos {x, y});
+                asteroid_positions.push(Pos { x, y });
             }
         }
     }
@@ -97,7 +98,6 @@ fn get_asteroid_positions(asteroid_map: &Vec<Vec<MapLoc>>) -> Vec<Pos> {
 //compare by distance from s to t1 and from s to t2
 //NOTE: assumes both t1 and t2 have same slope with s
 fn dist_cmp_from(s: &Pos, t1: &Pos, t2: &Pos) -> Ordering {
-
     //first confirm that they have the same slope with s
     //and thus, comparison by distance is sound
     assert_eq!(s.slope_to(t1), s.slope_to(t2));
@@ -111,31 +111,35 @@ fn dist_cmp_from(s: &Pos, t1: &Pos, t2: &Pos) -> Ordering {
     let dist1 = (t1_x - s_x).pow(2) + (t1_y - s_y).pow(2);
     let dist2 = (t2_x - s_x).pow(2) + (t2_y - s_y).pow(2);
 
-    if dist1 == 0 { return Ordering::Less; };
-    if dist2 == 0 { return Ordering::Greater; };
+    if dist1 == 0 {
+        return Ordering::Less;
+    };
+    if dist2 == 0 {
+        return Ordering::Greater;
+    };
 
     match dist1 - dist2 {
         0 => Ordering::Equal,
         d if d < 0 => Ordering::Less,
         _ => Ordering::Greater,
     }
-
 }
 
-fn enumerate_degs_from_laser_pos(laser_pos: &Pos, asteroid_positions: &[Pos]) -> HashMap<CanonDeg, Vec<Pos>> {
-    let mapper =
-        |pos: &Pos| -> (CanonDeg, Pos) {
+fn enumerate_degs_from_laser_pos(
+    laser_pos: &Pos,
+    asteroid_positions: &[Pos],
+) -> HashMap<CanonDeg, Vec<Pos>> {
+    let mapper = |pos: &Pos| -> (CanonDeg, Pos) {
         let c_deg = canonicalize(laser_pos.deg_with(pos));
         (c_deg, pos.clone())
     };
 
     let mut deg_to_pos_vec: HashMap<CanonDeg, Vec<Pos>> = HashMap::new();
-    for (c_deg, pos) in
-        asteroid_positions
+    for (c_deg, pos) in asteroid_positions
         .iter()
         .filter(|&p| p != laser_pos)
-        .map(mapper) {
-
+        .map(mapper)
+    {
         let v = deg_to_pos_vec.entry(c_deg).or_default();
         v.push(pos);
     }
@@ -155,7 +159,6 @@ pub fn part1(asteroid_map: &Vec<Vec<MapLoc>>) -> usize {
     *pos_to_number_seen.values().max().unwrap()
 
     //max is 338, at Pos { x: 23, y: 20 }
-
 }
 
 #[aoc(day10, part2)]
@@ -165,9 +168,8 @@ pub fn part2(asteroid_map: &Vec<Vec<MapLoc>>) -> usize {
     let asteroid_positions = get_asteroid_positions(&asteroid_map);
     let laser_position = MONITORING_STATION;
 
-    let mut deg_to_posvec: HashMap<CanonDeg, Vec<Pos>>  = enumerate_degs_from_laser_pos(&MONITORING_STATION, &asteroid_positions);
-
-
+    let mut deg_to_posvec: HashMap<CanonDeg, Vec<Pos>> =
+        enumerate_degs_from_laser_pos(&MONITORING_STATION, &asteroid_positions);
 
     //pre-sort buckets of same slope so that we get O(1) selection of next asteroid to destroy from this angle.
     //note that we sort by reverse order so that we can pop elements efficiently (from the back)
@@ -197,13 +199,7 @@ pub fn part2(asteroid_map: &Vec<Vec<MapLoc>>) -> usize {
                 return (pos.x * 100) + pos.y;
             }
         }
-
-
     }
-
-
 
     usize::max_value()
 }
-
-
