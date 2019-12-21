@@ -1,9 +1,9 @@
 use aoc_runner_derive::{aoc, aoc_generator};
 use itertools::Itertools;
-use std::cmp::Ordering;
-use std::ops::AddAssign;
-use std::collections::HashSet;
 use num::integer::lcm;
+use std::cmp::Ordering;
+use std::collections::HashSet;
+use std::ops::AddAssign;
 
 #[derive(Clone, Debug)]
 pub struct V3 {
@@ -24,7 +24,11 @@ impl AddAssign for V3 {
 
 impl V3 {
     pub fn neg(&self) -> V3 {
-        V3 { x: -(self.x), y: -(self.y), z: -(self.z) }
+        V3 {
+            x: -(self.x),
+            y: -(self.y),
+            z: -(self.z),
+        }
     }
 }
 
@@ -53,7 +57,6 @@ impl Moon {
     }
 
     pub fn gravity_with(&self, other: &Moon) -> V3 {
-
         let x = Moon::gravity_change(self.pos.x, other.pos.x);
         let y = Moon::gravity_change(self.pos.y, other.pos.y);
         let z = Moon::gravity_change(self.pos.z, other.pos.z);
@@ -84,7 +87,6 @@ impl Moon {
 
 #[aoc_generator(day12, part1)]
 pub fn input_generator(input: &str) -> Vec<Moon> {
-
     let line_fmt = |line| scan_fmt!(line, "<x={}, y={}, z={}>", i32, i32, i32);
 
     input
@@ -93,18 +95,15 @@ pub fn input_generator(input: &str) -> Vec<Moon> {
         .map(|scan_res| scan_res.expect("Parse error"))
         .map(|(x, y, z)| Moon::new(x, y, z))
         .collect_vec()
-
 }
 
 #[aoc(day12, part1)]
 pub fn day1(planets: &[Moon]) -> i32 {
-    const STEPS_TO_SIMULATE: usize = 1000 ;
+    const STEPS_TO_SIMULATE: usize = 1000;
 
     let mut planets = planets.to_vec();
 
-
     for _ in 0..STEPS_TO_SIMULATE {
-
         let zero_vel = V3 { x: 0, y: 0, z: 0 };
         let mut vel_changes: Vec<V3> = vec![zero_vel; 4];
 
@@ -113,22 +112,15 @@ pub fn day1(planets: &[Moon]) -> i32 {
 
             vel_changes[indexes[0]] += gravity.clone();
             vel_changes[indexes[1]] += gravity.neg().clone();
-
-
         }
 
         for (planet, vel_change) in planets.iter_mut().zip(vel_changes.iter()) {
             planet.add_velocity(&vel_change);
             planet.apply_own_velocity();
         }
-
     }
 
-
-    planets
-        .iter()
-        .map(|planet| planet.total_energy())
-        .sum()
+    planets.iter().map(|planet| planet.total_energy()).sum()
 }
 
 #[aoc_generator(day12, part2)]
@@ -140,43 +132,43 @@ fn input_generator_2(input: &str) -> (Vec<i32>, Vec<i32>, Vec<i32>) {
         .lines()
         .map(line_fmt)
         .map(|scan_res| scan_res.expect("Parse error"))
-        .for_each(|(x, y, z)| { x_vec.push(x); y_vec.push(y); z_vec.push(z); });
+        .for_each(|(x, y, z)| {
+            x_vec.push(x);
+            y_vec.push(y);
+            z_vec.push(z);
+        });
 
     (x_vec, y_vec, z_vec)
-
 }
 
 pub fn find_cycle_period(v: &[i32], steps_to_simulate: usize) -> usize {
     let mut pos = v.to_vec();
 
-    let ZERO_VEC: Vec<i32> = vec![0_i32; 4];
-    let mut vel = ZERO_VEC.clone();
+    let zero_vec: Vec<i32> = vec![0_i32; 4];
+    let mut vel = zero_vec.clone();
 
     let mut seen: HashSet<Vec<i32>> = HashSet::new();
 
     for step in 0..=steps_to_simulate {
-
         // the check against ZERO_VEC is an optimization.
         // since during the earliest cycle we must be back at the initial state
         // and at the initial state, the velocity was zero, there's no need to
         // check states where velocity isn't 0.
         // in other words, not only are we adding less states to the HashSet,
         // we don't need to hash the entire state (v, vel
-        if vel == ZERO_VEC {
-            let is_new = seen.insert( pos.clone() );
+        if vel == zero_vec {
+            let is_new = seen.insert(pos.clone());
             if !is_new {
                 return step;
             }
         }
 
-        for i in 0..(pos.len()-1) {
-            for j in (i+1)..pos.len() {
-
+        for i in 0..(pos.len() - 1) {
+            for j in (i + 1)..pos.len() {
                 let change = Moon::gravity_change(pos[i], pos[j]);
 
                 vel[i] += change;
                 vel[j] -= change;
-
             }
         }
 
@@ -184,11 +176,9 @@ pub fn find_cycle_period(v: &[i32], steps_to_simulate: usize) -> usize {
         for (v_c, &vel_c) in pos.iter_mut().zip(vel.iter()) {
             *v_c += vel_c;
         }
-
     }
 
     panic!("No cycle found. Maybe you should try increasing steps_to_simulate.")
-
 }
 
 // this one is tricky. had to look up hints.

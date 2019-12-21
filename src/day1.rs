@@ -1,9 +1,7 @@
 use aoc_runner_derive::{aoc, aoc_generator};
 
 fn mass_to_fuel(mass: u32) -> u32 {
-    (mass / 3)
-        .checked_sub(2)
-        .unwrap_or(0)
+    (mass / 3).checked_sub(2).unwrap_or(0)
 }
 
 fn fuel_calc_recursive(fuel: u32) -> u32 {
@@ -31,16 +29,12 @@ pub fn input_generator(input: &str) -> Vec<u32> {
 
 #[aoc(day1, part1)]
 pub fn part1(mass: &[u32]) -> u32 {
-    mass
-        .iter()
-        .map(|&mass_unit| mass_to_fuel(mass_unit))
-        .sum()
+    mass.iter().map(|&mass_unit| mass_to_fuel(mass_unit)).sum()
 }
 
 #[aoc(day1, part2)]
 pub fn part2(mass: &[u32]) -> u32 {
-        mass
-        .iter()
+    mass.iter()
         .map(|&mass_unit| fuel_calc_recursive(mass_unit))
         .sum()
 }

@@ -5,9 +5,7 @@ use aoc_runner_derive::{aoc, aoc_generator};
 use itertools::Itertools;
 
 fn line_splitter(line: &str) -> Option<(String, String)> {
-    line.split(')')
-        .map(|s| s.to_string())
-        .collect_tuple()
+    line.split(')').map(|s| s.to_string()).collect_tuple()
 }
 
 fn dfs(
