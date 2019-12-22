@@ -1,8 +1,6 @@
 use aoc_runner_derive::{aoc, aoc_generator};
 use crate::opcode::{OpcodeRunner, InputMode};
 use std::collections::HashSet;
-use std::io;
-use std::io::Write;
 
 #[aoc_generator(day11)]
 pub fn input_generator(input: &str) -> Vec<isize> {
