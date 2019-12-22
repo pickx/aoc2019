@@ -82,11 +82,12 @@ impl AmpChain {
                 runner.push_input_front(output);
             }
 
+
             while !runner.has_halted() {
                 let cur_opcode = runner.parse_cur_opcode();
-                runner.run_opcode(cur_opcode.clone());
+                let got_output = runner.exec_opcode(cur_opcode);
 
-                if let Opcode::Out(_) = cur_opcode {
+                if got_output {
                     last_output = runner.output();
                     break;
                 }

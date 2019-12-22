@@ -20,7 +20,7 @@ fn part1(mem: &[isize]) -> Option<isize> {
 
     while !runner.has_halted() {
         let cur_opcode = runner.parse_cur_opcode();
-        runner.run_opcode(cur_opcode);
+        runner.exec_opcode(cur_opcode);
     }
 
     runner.output()
@@ -36,7 +36,7 @@ fn part2(mem: &[isize]) -> Option<isize> {
 
     while !runner.has_halted() {
         let cur_opcode = runner.parse_cur_opcode();
-        runner.run_opcode(cur_opcode);
+        runner.exec_opcode(cur_opcode);
     }
 
     runner.output()

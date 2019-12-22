@@ -18,7 +18,7 @@ pub fn run_with_noun_and_verb(mem: &[isize], noun: isize, verb: isize) -> isize 
 
     while !runner.has_halted() {
         let cur_opcode = runner.parse_cur_opcode();
-        runner.run_opcode(cur_opcode);
+        runner.exec_opcode(cur_opcode);
     }
 
     runner.value_at_pos_0()
