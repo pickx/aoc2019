@@ -42,9 +42,6 @@ impl Pos {
     }
 }
 
-//pub type Pos = (usize, usize);
-
-
 impl Direction {
 
     fn y_dir(&self) -> isize {
@@ -139,7 +136,7 @@ impl Robot {
         self.runner.has_halted()
     }
 
-    pub fn paint_and_step_forward(&mut self, grid: &mut Vec<Vec<Color>>, input_to_use: isize) -> Pos {
+    pub fn paint_and_step_forward(&mut self, grid: &mut Vec<Vec<Color>>) -> Pos {
         let grid_rows = grid[0].len();
         let grid_cols = grid.len();
 
@@ -149,6 +146,10 @@ impl Robot {
 
         let pos_painted = self.pos;
 
+        let input_to_use = match &grid[self.pos.row][self.pos.col] {
+            Color::Black => 0,
+            Color::White => 1,
+        };
         self.runner.push_input(input_to_use);
         self.update_instructions();
 
@@ -172,6 +173,19 @@ enum Color {
     White,
 }
 
+fn _painter(grid: &Vec<Vec<Color>>) {
+    for row in grid {
+        for p in row {
+            match p {
+                Color::Black => {print!(".");},
+                Color::White => {print!("#");},
+            }
+
+        }
+        println!();
+    }
+}
+
 #[aoc(day11, part1)]
 fn part1(mem: &[isize]) -> usize {
     let (grid_cols, grid_rows) = (150, 150);
@@ -182,34 +196,12 @@ fn part1(mem: &[isize]) -> usize {
 
     let mut painted: HashSet<Pos> = HashSet::new();
 
-    loop {
-
-        let input_to_use = match &grid[robot.pos.row][robot.pos.col] {
-            Color::Black => 0,
-            Color::White => 1,
-        };
-
-        if robot.has_halted() { break; }
-
-        let pos_painted = robot.paint_and_step_forward(&mut grid, input_to_use);
+    while !robot.has_halted() {
+        let pos_painted = robot.paint_and_step_forward(&mut grid);
         painted.insert(pos_painted);
     }
 
     painted.len()
-}
-
-fn _printer(grid: &Vec<Vec<Color>>) {
-    for row in grid {
-        for p in row {
-            match p {
-                Color::Black => {print!(".");},
-                Color::White => {print!("#");},
-            }
-
-        }
-        println!();
-        io::stdout().flush();
-    }
 }
 
 #[aoc(day11, part2)]
@@ -222,18 +214,10 @@ fn part2(mem: &[isize]) -> &'static str {
 
     let mut robot = Robot::new(starting_pos, mem);
 
-    loop {
-
-        let input_to_use = match &grid[robot.pos.row][robot.pos.col] {
-            Color::Black => 0,
-            Color::White => 1,
-        };
-
-        if robot.has_halted() { break; }
-
-        let pos_painted = robot.paint_and_step_forward(&mut grid, input_to_use);
+    while !robot.has_halted() {
+        robot.paint_and_step_forward(&mut grid);
     }
 
-    //_printer(&grid); //paints "FKEKCFRK"
+    //_painter(&grid); //paints "FKEKCFRK"
     "FKEKCFRK"
 }
