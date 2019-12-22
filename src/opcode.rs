@@ -207,8 +207,10 @@ impl OpcodeRunner {
         }
     }
 
-    pub fn run_opcode(&mut self, opcode: Opcode) {
+    //executes opcode and returns true iff an Out instruction was executed
+    pub fn exec_opcode(&mut self, opcode: Opcode) -> bool {
         self.inst_ptr += &opcode.num_vals() + 1;
+        let mut got_new_output = false;
 
         match opcode {
             Opcode::Add(val1, val2, val3) => {
@@ -233,7 +235,9 @@ impl OpcodeRunner {
             }
 
             Opcode::Out(val) => {
+
                 self.output = Some(self.eval_interpret(val));
+                got_new_output = true;
             }
 
             Opcode::JumpIfTrue(val1, val2) => {
@@ -267,5 +271,7 @@ impl OpcodeRunner {
 
             Opcode::Halt => self.halted = true,
         };
+
+        got_new_output
     }
 }

@@ -22,8 +22,8 @@ fn part1(mem: &[isize]) -> isize {
 
     while !runner.has_halted() {
         let cur_opcode = runner.parse_cur_opcode();
-        runner.run_opcode(cur_opcode.clone());
-        if let Opcode::Out(_) = cur_opcode {
+        let got_output = runner.exec_opcode(cur_opcode);
+        if got_output {
             outputs.push(runner.output().unwrap());
         }
     }
@@ -45,8 +45,8 @@ fn part2(mem: &[isize]) -> isize {
 
     while !runner.has_halted() {
         let cur_opcode = runner.parse_cur_opcode();
-        runner.run_opcode(cur_opcode.clone());
-        if let Opcode::Out(_) = cur_opcode {
+        let got_output = runner.exec_opcode(cur_opcode);
+        if got_output {
             outputs.push(runner.output().unwrap());
         }
     }
