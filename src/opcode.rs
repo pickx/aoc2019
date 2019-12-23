@@ -12,6 +12,7 @@ pub enum Opcode {
     EQ(Value, Value, Value),   //8
     BaseOffset(Value),         //9
     Halt,                      //99
+    Reboot,                    //0
 }
 
 impl Opcode {
@@ -24,6 +25,7 @@ impl Opcode {
             Opcode::In(_) | Opcode::Out(_) | Opcode::BaseOffset(_) => 1,
             Opcode::JumpIfTrue(_, _) | Opcode::JumpIfFalse(_, _) => 2,
             Opcode::Halt => 0,
+            Opcode::Reboot => 0,
         }
     }
 }
@@ -172,6 +174,14 @@ impl OpcodeRunner {
         self.halted
     }
 
+    fn reboot(&mut self) {
+        self.inst_ptr = 0;
+        self.offset = 0;
+        self.inputs.clear();
+        self.extra_mem.clear();
+        self.halted = false;
+    }
+
     pub fn parse_cur_opcode(&mut self) -> Opcode {
         let ptr = self.inst_ptr;
         let code = self.mem_at(ptr);
@@ -202,6 +212,8 @@ impl OpcodeRunner {
             9 => Opcode::BaseOffset(val1),
 
             99 => Opcode::Halt,
+
+            0 => Opcode::Reboot,
 
             _ => panic!("Unsupported opcode: {}", code),
         }
@@ -270,6 +282,8 @@ impl OpcodeRunner {
             }
 
             Opcode::Halt => self.halted = true,
+
+            Opcode::Reboot => self.reboot(),
         };
 
         got_new_output
