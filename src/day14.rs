@@ -3,6 +3,7 @@ use itertools::Itertools;
 use std::collections::{HashMap, VecDeque};
 use std::iter::FromIterator;
 use std::cmp::min;
+use std::hash::Hash;
 
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct Element {
@@ -62,10 +63,21 @@ pub fn input_generator(input: &str) -> Vec<Reaction> {
     reactions
 }
 
-fn find_requirements(output_to_reaction: &HashMap<String, Reaction>,
-                     target_element: Element,
-                     base_requirements: &mut Vec<Element>) {
+fn check_reserve(quantity_in_reserve: &mut usize, quantity_we_need_to_make: usize) -> usize {
 
+    let quantity_we_can_take_from_reserve = min(*quantity_in_reserve, quantity_we_need_to_make);
+
+    *quantity_in_reserve -= quantity_we_can_take_from_reserve;
+
+    let quantity_left_to_make = quantity_we_need_to_make - quantity_we_can_take_from_reserve;
+
+    quantity_left_to_make
+}
+
+fn find_requirements(output_to_reaction: &HashMap<String, Reaction>, target_quantity: usize) -> usize {
+
+
+    let target_element = Element { name: "FUEL".to_string(), quantity: target_quantity };
     const BASE_ELEMENT: &str = "ORE";
 
     let mut requirements = VecDeque::new();
@@ -73,93 +85,121 @@ fn find_requirements(output_to_reaction: &HashMap<String, Reaction>,
 
     let mut reserve: HashMap<String, usize> = HashMap::new();
 
+    let mut base_element_amount_created = 0;
+
     while let Some(req) = requirements.pop_front() {
 
         let reaction = output_to_reaction
             .get(&req.name)
             .expect("Element has no reaction that makes it.");
 
-        let quantity_we_need_to_make = req.quantity;
-        let quantity_in_reserve = reserve.entry(req.name.clone()).or_insert(0);
 
-        let quantity_we_can_take_from_reserve = min(*quantity_in_reserve, quantity_we_need_to_make);
+        // this is all done in a block to not pollute the namespace with all those lets,
+        // and to make sure the mutable borrow of quantity_in_reserve is properly dropped.
+        // probably none of this is necessary and I'm just over-complicating things.
 
-        *quantity_in_reserve -= quantity_we_can_take_from_reserve;
+        let mut quantity_in_reserve = reserve
+            .entry(req.name.clone())
+            .or_insert(0);
 
-        let quantity_left_to_make = quantity_we_need_to_make - quantity_we_can_take_from_reserve;
+        let quantity_to_make = check_reserve(&mut quantity_in_reserve, req.quantity);
 
-        let quantity_reaction_makes = reaction.output.quantity;
-        let multiplier = 1 + (quantity_left_to_make / (quantity_reaction_makes + 1));
-//        quantity_left_to_make    4
-//        quantity_reaction_makes  4
-
-
-
-
-        let mut multiplier = 1;
-        while multiplier * quantity_reaction_makes < required_quantity {
-            multiplier += 1; //no need to do something more efficient here
+        if quantity_to_make == 0 {
+            continue;
         }
 
-        for inp in &reaction.inputs {
-            let mut inp_amount_needed = inp.quantity * multiplier;
+        let quantity_reaction_makes = reaction.output.quantity;
 
-            let amount_we_have_in_inventory = inventory
-                .entry(inp.name.clone())
-                .or_insert(0);
+        let multiplier = {
+            let mut multiplier = 1;
 
-
-            if *amount_we_have_in_inventory >= inp_amount_needed { //then we don't need to add to requirements
-                *amount_we_have_in_inventory -= inp_amount_needed;
-            } else {
-                inp_amount_needed -= *amount_we_have_in_inventory;
-                *amount_we_have_in_inventory = 0;
-
-                let added_req =
-                    Element {
-                        name: inp.name.clone(),
-                        quantity: inp_amount_needed,
-                    };
-
-                *amount_we_have_in_inventory = inp_amount_needed;
-
-                requirements.push(added_req);
+            while multiplier * quantity_reaction_makes < quantity_to_make {
+                multiplier += 1;
             }
 
-            if *amount_we_have_in_inventory == 0 {
-                inventory.remove(&inp.name);
+            multiplier
+        };
+
+        *quantity_in_reserve += (multiplier * quantity_reaction_makes) - quantity_to_make;
+
+        for inp in &reaction.inputs {
+
+            let quantity_we_need_to_make = inp.quantity * multiplier;
+
+            if inp.name == BASE_ELEMENT {
+                base_element_amount_created += quantity_we_need_to_make;
+            }
+            else {
+                let mut quantity_in_reserve = reserve
+                    .entry(inp.name.clone())
+                    .or_insert(0);
+
+                let quantity_to_make = check_reserve(&mut quantity_in_reserve, quantity_we_need_to_make);
+
+                if quantity_to_make > 0 {
+                    let added_requirement = Element { name: inp.name.clone(), quantity: quantity_to_make };
+                    requirements.push_back(added_requirement);
+                }
             }
         }
     }
+
+    base_element_amount_created
+}
+
+fn create_output_to_reaction(reactions: &[Reaction]) -> HashMap<String, Reaction> {
+    let name_iter = reactions
+        .iter()
+        .cloned()
+        .map(|reaction| reaction.output.name);
+    let reaction_iter = reactions
+        .iter()
+        .cloned();
+
+    let output_to_reaction: HashMap<String, Reaction> = HashMap::from_iter(
+        name_iter.zip(reaction_iter)
+    );
+
+    output_to_reaction
 }
 
 #[aoc(day14, part1)]
 pub fn day1(reactions: &[Reaction]) -> usize {
 
-    let name_and_reaction = reactions
-        .iter()
-        .map(|reaction| (reaction.output.name.clone(), reaction.clone()) );
-
-    let output_to_reaction: HashMap<String, Reaction> = HashMap::from_iter(name_and_reaction);
+    let output_to_reaction = create_output_to_reaction(reactions);
 
 
-    let target_element = Element { name: "FUEL".to_string(), quantity: 1 };
 
-    let mut base_requirements = Vec::new();
 
-    find_requirements(&output_to_reaction, target_element, &mut base_requirements);
+    find_requirements(&output_to_reaction, 1)
 
-//    base_requirements.sort_by_key(|elem| elem.name.clone());
-//    for (key, group) in &base_requirements.iter().group_by(|elt| &elt.name) {
-//        let total: usize = group.map(|elm| elm.quantity).sum();
-//        println!("Element {} has total quantity {}", key, total);
+}
+
+#[aoc(day14, part2)]
+fn part2(reactions: &[Reaction]) -> usize {
+
+    let ore_amount: usize = 1_000_000_000_000;
+
+    let output_to_reaction = create_output_to_reaction(reactions);
+
+    let mut quantity= 4800000;
+//    loop {
+//
+//
+//        if find_requirements(&output_to_reaction, quantity) > ore_amount {
+//            quantity -= 1;
+//        }
+//
+//        else { //then it is <= ore_amount
+//            if find_requirements(&output_to_reaction, quantity + 1) > ore_amount {
+//                return quantity;
+//            }
+//
+//            quantity += 1;
+//        }
+//
 //    }
-//    dbg!(base_requirements);
 
-//    0
+    find_requirements(&output_to_reaction, quantity)
 
-    base_requirements
-        .iter()
-        .map(|elem| elem.quantity)
-        .sum()
 }
