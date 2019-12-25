@@ -1,7 +1,8 @@
 use aoc_runner_derive::{aoc, aoc_generator};
 use itertools::Itertools;
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::iter::FromIterator;
+use std::cmp::min;
 
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct Element {
@@ -15,31 +16,44 @@ pub struct Reaction {
     output: Element,
 }
 
+fn parse_elem(elem_desc: &str) -> Element {
+    let mut iter = elem_desc.split_whitespace();
+
+    let quantity: usize = iter
+        .next()
+        .unwrap()
+        .parse()
+        .expect("Failed to parse quantity");
+
+    let name = iter
+        .next()
+        .unwrap()
+        .to_string();
+
+    Element { name, quantity }
+}
+
 #[aoc_generator(day14)]
 pub fn input_generator(input: &str) -> Vec<Reaction> {
 
-    let parse_elem = |elem_desc: &str| {
-        let (quant_str, elem_name) = elem_desc.split_whitespace().collect_tuple().unwrap();
-        let quantity: usize = quant_str.parse().unwrap();
-        Element { name: elem_name.to_string(), quantity }
-    };
+    const LHS_RHS_SEPARATOR: &str = " => ";
+    const LHS_DELIMITER: &str = ", ";
 
     let mut reactions = Vec::new();
 
     for line in input.lines() {
-        const LHS_RHS_SEPARATOR: &str = " => ";
-        const LHS_DELIMITER: &str = ", ";
 
-        let lhs_end = line.find(LHS_RHS_SEPARATOR).unwrap();
-        let (lhs, tail) = line.split_at(lhs_end);
-        let (_, rhs) = tail.split_at(LHS_RHS_SEPARATOR.len());
+        let mut iter = line.split(LHS_RHS_SEPARATOR);
 
-        let reaction_inputs: Vec<Element> =  lhs
+        let reaction_inputs: Vec<Element> = iter
+            .next()
+            .expect("No lhs")
             .split(LHS_DELIMITER)
             .map(|elem_desc| parse_elem(elem_desc))
             .collect();
 
-        let reaction_output = parse_elem(rhs);
+
+        let reaction_output = parse_elem(iter.next().expect("No rhs"));
 
         reactions.push( Reaction { inputs: reaction_inputs, output: reaction_output } );
 
@@ -48,70 +62,75 @@ pub fn input_generator(input: &str) -> Vec<Reaction> {
     reactions
 }
 
-fn find_requirements(output_to_reaction: &HashMap<String, Reaction>, requirements: Vec<Element>, base_requirements: &mut Vec<Element>) {
+fn find_requirements(output_to_reaction: &HashMap<String, Reaction>,
+                     target_element: Element,
+                     base_requirements: &mut Vec<Element>) {
 
-    let mut requirements = requirements;
-    let mut inventory: HashMap<String, usize> = HashMap::new();
+    const BASE_ELEMENT: &str = "ORE";
 
-    while let Some(req) = requirements.pop() {
-        let mut next_requirements = Vec::new();
-        let req_quantity = req.quantity;
+    let mut requirements = VecDeque::new();
+    requirements.push_back(target_element);
 
-        if let Some(reaction) = output_to_reaction.get(&req.name) {
+    let mut reserve: HashMap<String, usize> = HashMap::new();
 
-            let quantity_this_reaction_makes = reaction.output.quantity;
+    while let Some(req) = requirements.pop_front() {
 
-            let mut multiplier = 1;
-            while multiplier * quantity_this_reaction_makes < req_quantity {
-                multiplier += 1; //no need to do something more efficient here
-            }
+        let reaction = output_to_reaction
+            .get(&req.name)
+            .expect("Element has no reaction that makes it.");
 
-            for inp in &reaction.inputs {
-                let mut inp_amount_needed = inp.quantity * multiplier;
+        let quantity_we_need_to_make = req.quantity;
+        let quantity_in_reserve = reserve.entry(req.name.clone()).or_insert(0);
 
-                let amount_we_have_in_inventory = inventory
-                    .entry(inp.name.clone())
-                    .or_insert(0);
+        let quantity_we_can_take_from_reserve = min(*quantity_in_reserve, quantity_we_need_to_make);
 
-                if *amount_we_have_in_inventory >= inp_amount_needed { //then we don't need to add to requirements
-                    *amount_we_have_in_inventory -= inp_amount_needed;
-                }
+        *quantity_in_reserve -= quantity_we_can_take_from_reserve;
 
-                else {
-                    inp_amount_needed -= *amount_we_have_in_inventory;
-                    *amount_we_have_in_inventory = 0;
+        let quantity_left_to_make = quantity_we_need_to_make - quantity_we_can_take_from_reserve;
 
-                    let added_req =
+        let quantity_reaction_makes = reaction.output.quantity;
+        let multiplier = 1 + (quantity_left_to_make / (quantity_reaction_makes + 1));
+//        quantity_left_to_make    4
+//        quantity_reaction_makes  4
+
+
+
+
+        let mut multiplier = 1;
+        while multiplier * quantity_reaction_makes < required_quantity {
+            multiplier += 1; //no need to do something more efficient here
+        }
+
+        for inp in &reaction.inputs {
+            let mut inp_amount_needed = inp.quantity * multiplier;
+
+            let amount_we_have_in_inventory = inventory
+                .entry(inp.name.clone())
+                .or_insert(0);
+
+
+            if *amount_we_have_in_inventory >= inp_amount_needed { //then we don't need to add to requirements
+                *amount_we_have_in_inventory -= inp_amount_needed;
+            } else {
+                inp_amount_needed -= *amount_we_have_in_inventory;
+                *amount_we_have_in_inventory = 0;
+
+                let added_req =
                     Element {
                         name: inp.name.clone(),
                         quantity: inp_amount_needed,
                     };
 
-                    *amount_we_have_in_inventory = inp_amount_needed;
+                *amount_we_have_in_inventory = inp_amount_needed;
 
-                    requirements.push(added_req);
+                requirements.push(added_req);
+            }
 
-
-                }
-
-                if *amount_we_have_in_inventory == 0 {
-                    inventory.remove(&inp.name);
-                }
-
+            if *amount_we_have_in_inventory == 0 {
+                inventory.remove(&inp.name);
             }
         }
-
-
-        else {
-            base_requirements.push(req);
-        }
-
-
-
-
     }
-
-
 }
 
 #[aoc(day14, part1)]
@@ -120,15 +139,15 @@ pub fn day1(reactions: &[Reaction]) -> usize {
     let name_and_reaction = reactions
         .iter()
         .map(|reaction| (reaction.output.name.clone(), reaction.clone()) );
+
     let output_to_reaction: HashMap<String, Reaction> = HashMap::from_iter(name_and_reaction);
 
 
     let target_element = Element { name: "FUEL".to_string(), quantity: 1 };
 
-    let requirements: Vec<Element> = vec![target_element];
     let mut base_requirements = Vec::new();
 
-    find_requirements(&output_to_reaction, requirements, &mut base_requirements);
+    find_requirements(&output_to_reaction, target_element, &mut base_requirements);
 
 //    base_requirements.sort_by_key(|elem| elem.name.clone());
 //    for (key, group) in &base_requirements.iter().group_by(|elt| &elt.name) {
