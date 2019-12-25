@@ -15,7 +15,6 @@ pub struct Reaction {
     output: Element,
 }
 
-
 #[aoc_generator(day14)]
 pub fn input_generator(input: &str) -> Vec<Reaction> {
 
@@ -52,31 +51,59 @@ pub fn input_generator(input: &str) -> Vec<Reaction> {
 fn find_requirements(output_to_reaction: &HashMap<String, Reaction>, requirements: Vec<Element>, base_requirements: &mut Vec<Element>) {
 
     let mut requirements = requirements;
+    let mut inventory: HashMap<String, usize> = HashMap::new();
 
     while let Some(req) = requirements.pop() {
-
+        let mut next_requirements = Vec::new();
         let req_quantity = req.quantity;
 
         if let Some(reaction) = output_to_reaction.get(&req.name) {
 
-            if reaction.inputs[0].name != "ORE" {
-                for inp in &reaction.inputs {
-                let added_req =
+            let quantity_this_reaction_makes = reaction.output.quantity;
+
+            let mut multiplier = 1;
+            while multiplier * quantity_this_reaction_makes < req_quantity {
+                multiplier += 1; //no need to do something more efficient here
+            }
+
+            for inp in &reaction.inputs {
+                let mut inp_amount_needed = inp.quantity * multiplier;
+
+                let amount_we_have_in_inventory = inventory
+                    .entry(inp.name.clone())
+                    .or_insert(0);
+
+                if *amount_we_have_in_inventory >= inp_amount_needed { //then we don't need to add to requirements
+                    *amount_we_have_in_inventory -= inp_amount_needed;
+                }
+
+                else {
+                    inp_amount_needed -= *amount_we_have_in_inventory;
+                    *amount_we_have_in_inventory = 0;
+
+                    let added_req =
                     Element {
                         name: inp.name.clone(),
-                        quantity: inp.quantity * req_quantity,
+                        quantity: inp_amount_needed,
                     };
 
-                requirements.push(added_req);
-            }
-            }
+                    *amount_we_have_in_inventory = inp_amount_needed;
+
+                    requirements.push(added_req);
 
 
-            else {
-//            let base = Element { name: req.name.clone(), quantity: req_quantity };
+                }
+
+                if *amount_we_have_in_inventory == 0 {
+                    inventory.remove(&inp.name);
+                }
+
+            }
+        }
+
+
+        else {
             base_requirements.push(req);
-            }
-
         }
 
 
@@ -103,17 +130,17 @@ pub fn day1(reactions: &[Reaction]) -> usize {
 
     find_requirements(&output_to_reaction, requirements, &mut base_requirements);
 
-    base_requirements.sort_by_key(|elem| elem.name.clone());
-    for (key, group) in &base_requirements.iter().group_by(|elt| &elt.name) {
-        let total: usize = group.map(|elm| elm.quantity).sum();
-        println!("Element {} has total quantity {}", key, total);
-    }
+//    base_requirements.sort_by_key(|elem| elem.name.clone());
+//    for (key, group) in &base_requirements.iter().group_by(|elt| &elt.name) {
+//        let total: usize = group.map(|elm| elm.quantity).sum();
+//        println!("Element {} has total quantity {}", key, total);
+//    }
 //    dbg!(base_requirements);
 
-    0
+//    0
 
-//    base_requirements
-//        .iter()
-//        .map(|elem| elem.quantity)
-//        .sum()
+    base_requirements
+        .iter()
+        .map(|elem| elem.quantity)
+        .sum()
 }
