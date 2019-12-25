@@ -182,7 +182,7 @@ fn part2(reactions: &[Reaction]) -> usize {
 
     let output_to_reaction = create_output_to_reaction(reactions);
 
-    let mut quantity= 4800000;
+    let mut quantity= 4250000;
 //    loop {
 //
 //
