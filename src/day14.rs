@@ -74,7 +74,7 @@ fn check_reserve(quantity_in_reserve: &mut usize, quantity_we_need_to_make: usiz
     quantity_left_to_make
 }
 
-fn find_requirements(output_to_reaction: &HashMap<String, Reaction>, target_quantity: usize) -> usize {
+fn find_base_amount_needed(output_to_reaction: &HashMap<String, Reaction>, target_quantity: usize) -> usize {
 
 
     let target_element = Element { name: "FUEL".to_string(), quantity: target_quantity };
@@ -168,10 +168,7 @@ pub fn day1(reactions: &[Reaction]) -> usize {
 
     let output_to_reaction = create_output_to_reaction(reactions);
 
-
-
-
-    find_requirements(&output_to_reaction, 1)
+    find_base_amount_needed(&output_to_reaction, 1)
 
 }
 
@@ -182,24 +179,36 @@ fn part2(reactions: &[Reaction]) -> usize {
 
     let output_to_reaction = create_output_to_reaction(reactions);
 
-    let mut quantity= 4065790;
-    loop {
+//    we do a binary search in the interval [x, SEARCH_FACTOR * x]
+//    such that x <= maximum_amount_of_fuel_we_can_make,
+//    but SEARCH_FACTOR * x > maximum_amount_of_fuel_we_can_make.
+    let mut hi = 1;
 
+    //did a few benchmarks, this factor consistently gives good performance
+    const SEARCH_FACTOR: usize = 11;
 
-        if find_requirements(&output_to_reaction, quantity) > ore_amount {
-            quantity -= 5000;
-        }
-
-        else { //then it is <= ore_amount
-            if find_requirements(&output_to_reaction, quantity + 1) > ore_amount {
-                return quantity;
-            }
-
-            quantity += 1;
-        }
-
+    while find_base_amount_needed(&output_to_reaction, hi) < ore_amount {
+        hi *= SEARCH_FACTOR;
     }
 
-    find_requirements(&output_to_reaction, quantity)
-//    unreachable!()
+    let mut lo = hi / SEARCH_FACTOR;
+
+    loop {
+        let mid = (lo + hi) / 2;
+
+        if find_base_amount_needed(&output_to_reaction, mid) > ore_amount {
+            hi = mid - 1;
+        }
+
+        else {
+            if find_base_amount_needed(&output_to_reaction, mid + 1) > ore_amount {
+                break mid //equivalent to "return mid;" but with more swag
+            }
+
+            lo = mid + 1;
+
+        }
+    }
+
+
 }
