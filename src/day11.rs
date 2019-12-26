@@ -1,5 +1,5 @@
 use aoc_runner_derive::{aoc, aoc_generator};
-use crate::opcode::{OpcodeRunner, InputMode};
+use crate::opcode::{OpcodeRunner};
 use std::collections::HashSet;
 
 #[aoc_generator(day11)]
@@ -89,9 +89,7 @@ impl Robot {
     pub fn new(start_pos: Pos, mem: &[isize]) -> Robot {
         let default_facing = Direction::Up;
 
-        let mut runner = OpcodeRunner::new(mem);
-//        runner.set_input_consume_mode(InputMode::SingleInput);
-
+        let runner = OpcodeRunner::new(mem);
 
         Robot { facing: default_facing, color_to_paint: Color::Black, pos: start_pos, runner }
     }
