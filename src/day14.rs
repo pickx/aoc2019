@@ -1,5 +1,4 @@
 use aoc_runner_derive::{aoc, aoc_generator};
-use itertools::Itertools;
 use std::collections::{HashMap, VecDeque};
 use std::iter::FromIterator;
 use std::cmp::min;

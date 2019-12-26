@@ -1,5 +1,5 @@
 use aoc_runner_derive::{aoc, aoc_generator};
-use crate::opcode::{OpcodeRunner, Opcode};
+use crate::opcode::{OpcodeRunner};
 
 #[aoc_generator(day9)]
 pub fn input_generator(input: &str) -> Vec<isize> {

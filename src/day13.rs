@@ -40,7 +40,7 @@ impl From<isize> for Tile {
     }
 }
 
-fn draw(screen: &Vec<Vec<Tile>>) {
+fn _draw(screen: &Vec<Vec<Tile>>) {
     for row in screen {
         for &tile in row {
             let graphic = match tile {
@@ -70,10 +70,10 @@ fn create_screen() -> Vec<Vec<Tile>>{
     screen
 }
 
-fn ask_for_input() -> isize {
+fn _ask_for_input() -> isize {
     let mut input = String::new();
     match io::stdin().read_line(&mut input) {
-        Ok(n) => {
+        Ok(_) => {
             let first_char = input.chars().nth(0).unwrap();
             match first_char {
                 'a' => -1,
@@ -82,7 +82,7 @@ fn ask_for_input() -> isize {
                 _ => panic!("bad input: got {}", input),
             }
         }
-        Err(error) => panic!("failed to read input"),
+        Err(_error) => panic!("failed to read input"),
     }
 }
 
@@ -137,7 +137,7 @@ fn play(runner: OpcodeRunner) -> isize {
                     let (row, col) = (out2 as usize, out1 as usize);
                     let t_type: Tile = out3.into();
                     screen[row][col] = t_type;
-                    draw(&screen);
+//                    _draw(&screen); //no longer needed since the game is not interactive anymore
                 }
 
             }
@@ -202,11 +202,10 @@ pub fn part2(mem: &[isize]) -> isize {
     //"Memory address 0 represents the number of quarters that have been inserted; set it to 2 to play for free."
     mem[0] = 2;
 
-    let mut tiles: HashMap<Pos, Tile> = HashMap::new();
+    let runner = OpcodeRunner::new(&mem);
 
-    let mut runner = OpcodeRunner::new(&mem);
+    play(runner) //games plays itself, ends up returning the final score
 
-    play(runner)
 
 }
 
