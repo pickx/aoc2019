@@ -1,4 +1,7 @@
 use std::collections::{HashMap, VecDeque};
+use std::io;
+use std::fmt::Error;
+use std::ops::Deref;
 
 #[derive(Eq, PartialEq, Clone)]
 pub enum Opcode {
@@ -287,5 +290,24 @@ impl OpcodeRunner {
         };
 
         got_new_output
+    }
+
+    pub fn ask_for_input(lookup_table: &HashMap<char, isize>) -> Result<isize, &'static str> {
+        let mut input = String::new();
+        match io::stdin().read_line(&mut input) {
+            Ok(_) => {
+                let first_char = input
+                    .chars()
+                    .nth(0)
+                    .unwrap();
+
+                //wow this is ugly, gotta practice making these look better.
+                lookup_table
+                    .get(&first_char)
+                    .and_then(|res| Some(*res))
+                    .ok_or_else(|| "Command not found in lookup table")
+            }
+            Err(_error) => panic!("failed to read input, got {:?}", _error),
+        }
     }
 }
