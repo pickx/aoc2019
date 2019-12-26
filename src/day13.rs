@@ -70,22 +70,6 @@ fn create_screen() -> Vec<Vec<Tile>>{
     screen
 }
 
-fn _ask_for_input() -> isize {
-    let mut input = String::new();
-    match io::stdin().read_line(&mut input) {
-        Ok(_) => {
-            let first_char = input.chars().nth(0).unwrap();
-            match first_char {
-                'a' => -1,
-                's' => 0,
-                'd' => 1,
-                _ => panic!("bad input: got {}", input),
-            }
-        }
-        Err(_error) => panic!("failed to read input"),
-    }
-}
-
 //instead of playing the game, I realized that when the ball hits the floor,
 //it sends Opcode 0. So rather than crash when receiving Opcode 0, I made my
 //runner restart when Opcode 0 is received, however the memory remains,
@@ -104,7 +88,7 @@ fn play(runner: OpcodeRunner) -> isize {
             let next_opcode = runner.parse_cur_opcode();
 
             if let Opcode::In(_) = next_opcode {
-//                let joystick_position = ask_for_input();
+//                let joystick_position = OpcodeRunner::ask_for_input();
                 let joystick_position = 0; //hacked
                 runner.push_input(joystick_position);
             }
