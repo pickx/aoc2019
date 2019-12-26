@@ -111,7 +111,7 @@ fn find_requirements(output_to_reaction: &HashMap<String, Reaction>, target_quan
         let quantity_reaction_makes = reaction.output.quantity;
 
         let multiplier = {
-            let mut multiplier = 1;
+            let mut multiplier = quantity_to_make / quantity_reaction_makes;
 
             while multiplier * quantity_reaction_makes < quantity_to_make {
                 multiplier += 1;
@@ -182,24 +182,24 @@ fn part2(reactions: &[Reaction]) -> usize {
 
     let output_to_reaction = create_output_to_reaction(reactions);
 
-    let mut quantity= 4250000;
-//    loop {
-//
-//
-//        if find_requirements(&output_to_reaction, quantity) > ore_amount {
-//            quantity -= 1;
-//        }
-//
-//        else { //then it is <= ore_amount
-//            if find_requirements(&output_to_reaction, quantity + 1) > ore_amount {
-//                return quantity;
-//            }
-//
-//            quantity += 1;
-//        }
-//
-//    }
+    let mut quantity= 4065790;
+    loop {
+
+
+        if find_requirements(&output_to_reaction, quantity) > ore_amount {
+            quantity -= 5000;
+        }
+
+        else { //then it is <= ore_amount
+            if find_requirements(&output_to_reaction, quantity + 1) > ore_amount {
+                return quantity;
+            }
+
+            quantity += 1;
+        }
+
+    }
 
     find_requirements(&output_to_reaction, quantity)
-
+//    unreachable!()
 }
