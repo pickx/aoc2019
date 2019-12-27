@@ -33,6 +33,8 @@ impl Opcode {
     }
 }
 
+
+
 #[derive(Eq, PartialEq, Clone)]
 pub enum Value {
     Position(isize),  //0
@@ -51,6 +53,7 @@ impl Value {
     }
 }
 
+#[derive(Clone)]
 pub struct OpcodeRunner {
     mem: Vec<isize>,
     extra_mem: HashMap<isize, isize>,
@@ -62,6 +65,7 @@ pub struct OpcodeRunner {
     halted: bool,
 }
 
+#[derive(Clone)]
 pub enum InputMode {
     ConsumeInput,
     SingleInput,
@@ -79,6 +83,19 @@ impl OpcodeRunner {
             output: None,
             halted: false,
         }
+    }
+
+/// this deconstructs "state" after use and drop()s all of self's old members.
+/// it's basically a move constructor.
+    pub fn load_state(&mut self, state: OpcodeRunner) {
+        self.mem = state.mem;
+        self.extra_mem = state.extra_mem;
+        self.inst_ptr = state.inst_ptr;
+        self.offset = state.offset;
+        self.inputs = state.inputs;
+        self.output = state.output;
+        self.halted = state.halted;
+
     }
 
     #[allow(dead_code)]
