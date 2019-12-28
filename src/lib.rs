@@ -2,6 +2,7 @@
 extern crate scan_fmt;
 extern crate aoc_runner_derive;
 extern crate itertools;
+extern crate cascade;
 
 use aoc_runner_derive::aoc_lib;
 

@@ -1,7 +1,5 @@
 use std::collections::{HashMap, VecDeque};
 use std::io;
-use std::fmt::Error;
-use std::ops::Deref;
 
 #[derive(Eq, PartialEq, Clone)]
 pub enum Opcode {
