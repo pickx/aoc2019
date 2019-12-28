@@ -83,60 +83,21 @@ fn movement_code_to_direction(movement_code: isize) -> Pos {
     }
 }
 
-fn dfs(maze: &mut HashMap<Pos, Tile>, from: Pos) {
-
-    let (x, y) = (from.0, from.1);
+fn positions_from(pos: Pos, maze: &HashMap<Pos, Tile>) -> Vec<_>{
+    let (x, y) = (pos.x, pos.y);
     let positions = [(x, y-1), (x, y+1), (x-1, y), (x+1, y)];
     let movement_codes = [1_isize, 2, 3, 4];
-    let mut unexplored_positions = positions
+
+     positions
         .iter()
         .zip(movement_codes.iter())
         .filter(|&(pos, _)| !maze.contains_key(pos))
-        .collect_vec();
+        .collect_vec()
+}
 
-    for (_, movement_code) in unexplored_positions {
+fn dfs(maze: &mut HashMap<Pos, Tile>, runner: from: Pos, distance: usize) {
 
-            let movement = movement_code_to_direction(*movement_code);
 
-            runner.push_input(*movement_code);
-            let got_output = false;
-
-            let movement_result: MovementResult = loop {
-                let next_opcode = runner.parse_cur_opcode();
-
-                let got_output = runner.exec_opcode(next_opcode);
-
-                if got_output {
-                    break match runner.output().unwrap() {
-                        0 => MovementResult::HitWall,
-                        1 => MovementResult::MoveSuccess,
-                        2 => MovementResult::FoundOxygenSystem,
-                        x => panic!("Got unsupported output {}", x),
-                    };
-                }
-            };
-
-            let new_pos = (robot_pos.0 + movement.0, robot_pos.1 + movement.1);
-
-            match movement_result {
-                MovementResult::HitWall => {
-                    maze.insert(new_pos, Tile::Wall);
-                },
-
-                MovementResult::MoveSuccess => {
-                    maze.insert(robot_pos, Tile::Empty);
-                    robot_pos = new_pos;
-                }
-
-                MovementResult::FoundOxygenSystem => {
-                    maze.insert(new_pos, Tile::OxygenSystem);
-                    let oxygen_system_pos = new_pos;
-//                return manhattan_distance(starting_position, new_pos);
-                    println!("Found OxygenSystem at ({}, {})", new_pos.0, new_pos.1);
-//                    return dfs(starting_position, oxygen_system_pos);
-                    return 0;
-                }
-            }
 
 
 }
@@ -147,105 +108,105 @@ fn dfs(maze: &mut HashMap<Pos, Tile>, from: Pos) {
 #[aoc(day15, part1)]
 fn part1(mem: &[isize]) -> usize {
 
-    let mut maze: HashMap<Pos, Tile> = HashMap::new();
-    let mut runner = OpcodeRunner::new(mem);
-    runner.set_input_consume_mode(InputMode::SingleInput);
-    let starting_position = (0, 0);
-    let mut robot_pos: Pos = starting_position;
-
-
-
-    let mut lookup_table: HashMap<char, isize> = HashMap::new();
-    lookup_table.insert('n', 1);
-    lookup_table.insert('N', 1);
-    lookup_table.insert('s', 2);
-    lookup_table.insert('S', 2);
-    lookup_table.insert('w', 3);
-    lookup_table.insert('W', 3);
-    lookup_table.insert('e', 4);
-    lookup_table.insert('E', 4);
-
-    loop {
-        maze.insert(robot_pos, Tile::Robot);
-
-        let image = image(&maze, robot_pos);
-        draw(image);
-
-        let (x, y) = (robot_pos.0, robot_pos.1);
-        let positions = [(x, y-1), (x, y+1), (x-1, y), (x+1, y)];
-        let movement_codes = [1_isize, 2, 3, 4];
-        let mut unexplored_positions = positions
-            .iter()
-            .zip(movement_codes.iter())
-            .filter(|&(pos, _)| !maze.contains_key(pos))
-            .collect_vec();
-
-
-        for (_, movement_code) in unexplored_positions {
-
-            let movement: Pos = match movement_code {
-                1 => (0, -1),
-                2 => (0, 1),
-                3 => (-1, 0),
-                4 => (1, 0),
-                _ => panic!("Illegal movement"),
-            };
-
-            runner.push_input(*movement_code);
-            let got_output = false;
-
-            let movement_result: MovementResult = loop {
-                let next_opcode = runner.parse_cur_opcode();
-
-                let got_output = runner.exec_opcode(next_opcode);
-
-                if got_output {
-                    break match runner.output().unwrap() {
-                        0 => MovementResult::HitWall,
-                        1 => MovementResult::MoveSuccess,
-                        2 => MovementResult::FoundOxygenSystem,
-                        x => panic!("Got unsupported output {}", x),
-                    };
-                }
-            };
-
-            let new_pos = (robot_pos.0 + movement.0, robot_pos.1 + movement.1);
-
-            match movement_result {
-                MovementResult::HitWall => {
-                    maze.insert(new_pos, Tile::Wall);
-                },
-
-                MovementResult::MoveSuccess => {
-                    maze.insert(robot_pos, Tile::Empty);
-                    robot_pos = new_pos;
-                }
-
-                MovementResult::FoundOxygenSystem => {
-                    maze.insert(new_pos, Tile::OxygenSystem);
-                    let oxygen_system_pos = new_pos;
-//                return manhattan_distance(starting_position, new_pos);
-                    println!("Found OxygenSystem at ({}, {})", new_pos.0, new_pos.1);
-//                    return dfs(starting_position, oxygen_system_pos);
-                    return 0;
-                }
-            }
-
-
-        }
-
-
-//        let movement_code = loop {
-//            if let Ok(code) = OpcodeRunner::ask_for_input(&lookup_table) {
-//                break code
+//    let mut maze: HashMap<Pos, Tile> = HashMap::new();
+//    let mut runner = OpcodeRunner::new(mem);
+//    runner.set_input_consume_mode(InputMode::SingleInput);
+//    let starting_position = (0, 0);
+//    let mut robot_pos: Pos = starting_position;
+//
+//
+//
+//    let mut lookup_table: HashMap<char, isize> = HashMap::new();
+//    lookup_table.insert('n', 1);
+//    lookup_table.insert('N', 1);
+//    lookup_table.insert('s', 2);
+//    lookup_table.insert('S', 2);
+//    lookup_table.insert('w', 3);
+//    lookup_table.insert('W', 3);
+//    lookup_table.insert('e', 4);
+//    lookup_table.insert('E', 4);
+//
+//    loop {
+//        maze.insert(robot_pos, Tile::Robot);
+//
+//        let image = image(&maze, robot_pos);
+//        draw(image);
+//
+//        let (x, y) = (robot_pos.0, robot_pos.1);
+//        let positions = [(x, y-1), (x, y+1), (x-1, y), (x+1, y)];
+//        let movement_codes = [1_isize, 2, 3, 4];
+//        let mut unexplored_positions = positions
+//            .iter()
+//            .zip(movement_codes.iter())
+//            .filter(|&(pos, _)| !maze.contains_key(pos))
+//            .collect_vec();
+//
+//
+//        for (_, movement_code) in unexplored_positions {
+//
+//            let movement: Pos = match movement_code {
+//                1 => (0, -1),
+//                2 => (0, 1),
+//                3 => (-1, 0),
+//                4 => (1, 0),
+//                _ => panic!("Illegal movement"),
+//            };
+//
+//            runner.push_input(*movement_code);
+//            let got_output = false;
+//
+//            let movement_result: MovementResult = loop {
+//                let next_opcode = runner.parse_cur_opcode();
+//
+//                let got_output = runner.exec_opcode(next_opcode);
+//
+//                if got_output {
+//                    break match runner.output().unwrap() {
+//                        0 => MovementResult::HitWall,
+//                        1 => MovementResult::MoveSuccess,
+//                        2 => MovementResult::FoundOxygenSystem,
+//                        x => panic!("Got unsupported output {}", x),
+//                    };
+//                }
+//            };
+//
+//            let new_pos = (robot_pos.0 + movement.0, robot_pos.1 + movement.1);
+//
+//            match movement_result {
+//                MovementResult::HitWall => {
+//                    maze.insert(new_pos, Tile::Wall);
+//                },
+//
+//                MovementResult::MoveSuccess => {
+//                    maze.insert(robot_pos, Tile::Empty);
+//                    robot_pos = new_pos;
+//                }
+//
+//                MovementResult::FoundOxygenSystem => {
+//                    maze.insert(new_pos, Tile::OxygenSystem);
+//                    let oxygen_system_pos = new_pos;
+////                return manhattan_distance(starting_position, new_pos);
+//                    println!("Found OxygenSystem at ({}, {})", new_pos.0, new_pos.1);
+////                    return dfs(starting_position, oxygen_system_pos);
+//                    return 0;
+//                }
 //            }
-//        };
+//
+//
+//        }
+//
+//
+////        let movement_code = loop {
+////            if let Ok(code) = OpcodeRunner::ask_for_input(&lookup_table) {
+////                break code
+////            }
+////        };
 
 
 
 
 
 
-    }
+//}
 
 }
