@@ -22,8 +22,6 @@ enum Tile {
 type Pos = (isize, isize); // (x,y ) position relative to starting point (0, 0)
 
 
-
-
 #[derive(Clone, Copy, Eq, PartialEq)]
 enum MoveResult {
     HitWall,
@@ -60,16 +58,6 @@ impl From<MoveResult> for isize {
             MoveResult::MoveSuccess => 1,
             MoveResult::FoundOxygenSystem => 2,
         }
-    }
-}
-
-fn _movement_code_to_direction(movement_code: isize) -> Pos {
-    match movement_code {
-        1 => (0, -1),
-        2 => (0, 1),
-        3 => (-1, 0),
-        4 => (1, 0),
-        _ => panic!("Illegal movement"),
     }
 }
 
