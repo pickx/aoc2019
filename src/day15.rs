@@ -3,7 +3,6 @@ use aoc_runner_derive::{aoc, aoc_generator};
 use crate::opcode::*;
 use std::collections::HashMap;
 use std::convert::TryFrom;
-use itertools::Itertools;
 use crate::day15::MoveResult::{MoveSuccess, HitWall};
 
 #[aoc_generator(day15)]
@@ -39,6 +38,8 @@ impl TryFrom<&Tile> for char {
 
 type Pos = (isize, isize); // (x,y ) position relative to starting point (0, 0)
 
+
+//no longer used now that I've removed interactive play mode (fun is no longer allowed...)
 fn image(maze: &HashMap<Pos, Tile>, robot_pos: Pos) -> Vec<Vec<char>> {
     let unexplored: char = ' ';
     let dist: isize = 3;
@@ -57,7 +58,8 @@ fn image(maze: &HashMap<Pos, Tile>, robot_pos: Pos) -> Vec<Vec<char>> {
     image
 }
 
-fn draw(image: Vec<Vec<char>>) {
+//no longer used now that I've removed interactive play mode (fun is no longer allowed...)
+fn _draw(image: Vec<Vec<char>>) {
     for row in image {
         for c in row {
             print!("{}", c);
@@ -66,6 +68,7 @@ fn draw(image: Vec<Vec<char>>) {
         println!();
     }
 }
+
 
 #[derive(Clone, Copy, Eq, PartialEq)]
 enum MoveResult {
@@ -194,11 +197,7 @@ fn dfs(maze: &mut HashMap<Pos, Tile>,
 }
 
 
-
-
-#[aoc(day15, part1)]
-fn part1(mem: &[isize]) -> usize {
-
+fn find_maze_and_distances(mem: &[isize]) -> (HashMap<Pos, Tile>, HashMap<Pos, usize>) {
     let starting_position = (0, 0);
 
     let mut maze: HashMap<Pos, Tile> = HashMap::new();
@@ -216,6 +215,35 @@ fn part1(mem: &[isize]) -> usize {
         dfs(&mut maze, &mut distances, position, runner.clone(),code, 1);
     }
 
+    (maze, distances)
+}
+
+fn find_oxygen_spread_times(maze: &HashMap<Pos, Tile>,
+                            oxygen_spread_time: &mut HashMap<Pos, usize>,
+                            cur_pos: Pos,
+                            timestamp: usize) {
+
+    if oxygen_spread_time.contains_key(&cur_pos) { return; }
+
+    oxygen_spread_time.insert(cur_pos, timestamp);
+
+    let keep_searching_from_this_pos = |pos| find_oxygen_spread_times(maze, oxygen_spread_time, pos, timestamp + 1);
+
+    //wow look how terse and functional my code is!!!!
+    //definitely not unnecessarily obfuscated and confusing
+    //I mean, at least I enjoyed writing it
+    positions_from(cur_pos)
+        .iter()
+        .map(|&(pos, _)| pos)
+        .filter(|pos| maze[pos] == Tile::Empty)
+        .for_each(keep_searching_from_this_pos);
+}
+
+#[aoc(day15, part1)]
+fn part1(mem: &[isize]) -> usize {
+
+    let (maze, distances) = find_maze_and_distances(mem);
+
     for (pos, dist) in distances {
         if maze[&pos] == Tile::OxygenSystem {
             return dist;
@@ -223,4 +251,24 @@ fn part1(mem: &[isize]) -> usize {
     }
 
     usize::max_value()
+}
+
+#[aoc(day15, part2)]
+pub fn part2(mem: &[isize]) -> Option<usize> {
+
+    let (maze, _) = find_maze_and_distances(mem);
+
+    let (&oxygen_system_pos, _) = maze
+        .iter()
+        .find(|(_, &tile)| tile == Tile::OxygenSystem)
+        .expect("oxygen system not found on map");
+
+    let mut oxygen_spread_time: HashMap<Pos, usize> = HashMap::new();
+
+    find_oxygen_spread_times(&maze, &mut oxygen_spread_time, oxygen_system_pos, 0);
+
+    oxygen_spread_time
+        .values()
+        .max()
+        .and_then(|&n| Some(n))
 }
