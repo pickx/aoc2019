@@ -6,7 +6,7 @@ extern crate cascade;
 
 use aoc_runner_derive::aoc_lib;
 
-mod opcode;
+mod intcode;
 
 //mod day1;
 //mod day2;
@@ -22,7 +22,8 @@ mod opcode;
 //mod day12;
 //mod day13;
 //mod day14;
-mod day15;
+//mod day15;
 //mod day16;
+mod day17;
 
 aoc_lib! { year = 2019 }

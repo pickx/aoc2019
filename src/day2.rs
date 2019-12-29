@@ -1,4 +1,4 @@
-use crate::opcode::*;
+use crate::intcode::*;
 use aoc_runner_derive::{aoc, aoc_generator};
 
 #[aoc_generator(day2)]
@@ -11,7 +11,7 @@ pub fn input_generator(input: &str) -> Vec<isize> {
 }
 
 pub fn run_with_noun_and_verb(mem: &[isize], noun: isize, verb: isize) -> isize {
-    let mut runner = OpcodeRunner::new(mem);
+    let mut runner = IntcodeRunner::new(mem);
 
     runner.set_noun(noun);
     runner.set_verb(verb);

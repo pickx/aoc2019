@@ -1,4 +1,4 @@
-use crate::opcode::*;
+use crate::intcode::*;
 use aoc_runner_derive::{aoc, aoc_generator};
 extern crate permute;
 use itertools::all;
@@ -7,12 +7,12 @@ use std::borrow::BorrowMut;
 
 pub struct Amp {
     _phase: isize,
-    pub runner: OpcodeRunner,
+    pub runner: IntcodeRunner,
 }
 
 impl Amp {
     pub fn new(mem: &[isize], phase: isize) -> Amp {
-        let mut runner = OpcodeRunner::new(mem);
+        let mut runner = IntcodeRunner::new(mem);
         runner.push_input(phase);
         Amp {
             _phase: phase,
@@ -60,7 +60,7 @@ impl AmpChain {
         }
     }
 
-    fn current_runner(&mut self) -> &mut OpcodeRunner {
+    fn current_runner(&mut self) -> &mut IntcodeRunner {
         self.amps[self.running_amp].runner.borrow_mut()
     }
 

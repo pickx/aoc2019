@@ -1,5 +1,5 @@
 use aoc_runner_derive::{aoc, aoc_generator};
-use crate::opcode::{OpcodeRunner};
+use crate::intcode::{IntcodeRunner};
 use std::collections::HashSet;
 
 #[aoc_generator(day11)]
@@ -82,14 +82,14 @@ struct Robot {
     facing: Direction,
     color_to_paint: Color,
     pos: Pos,
-    runner: OpcodeRunner,
+    runner: IntcodeRunner,
 }
 
 impl Robot {
     pub fn new(start_pos: Pos, mem: &[isize]) -> Robot {
         let default_facing = Direction::Up;
 
-        let runner = OpcodeRunner::new(mem);
+        let runner = IntcodeRunner::new(mem);
 
         Robot { facing: default_facing, color_to_paint: Color::Black, pos: start_pos, runner }
     }

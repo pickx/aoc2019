@@ -52,7 +52,7 @@ impl Value {
 }
 
 #[derive(Clone)]
-pub struct OpcodeRunner {
+pub struct IntcodeRunner {
     mem: Vec<isize>,
     extra_mem: HashMap<isize, isize>,
     inst_ptr: isize,
@@ -69,9 +69,9 @@ pub enum InputMode {
     SingleInput,
 }
 
-impl OpcodeRunner {
-    pub fn new(mem: &[isize]) -> OpcodeRunner {
-        OpcodeRunner {
+impl IntcodeRunner {
+    pub fn new(mem: &[isize]) -> IntcodeRunner {
+        IntcodeRunner {
             mem: mem.to_vec(),
             extra_mem: HashMap::new(),
             inst_ptr: 0,

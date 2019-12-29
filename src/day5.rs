@@ -1,4 +1,4 @@
-use crate::opcode::*;
+use crate::intcode::*;
 use aoc_runner_derive::{aoc, aoc_generator};
 
 #[aoc_generator(day5)]
@@ -14,7 +14,7 @@ pub fn input_generator(input: &str) -> Vec<isize> {
 fn part1(mem: &[isize]) -> Option<isize> {
     const INPUT: isize = 1;
 
-    let mut runner = OpcodeRunner::new(mem);
+    let mut runner = IntcodeRunner::new(mem);
     runner.set_input_consume_mode(InputMode::SingleInput);
     runner.push_input(INPUT);
 
@@ -30,7 +30,7 @@ fn part1(mem: &[isize]) -> Option<isize> {
 fn part2(mem: &[isize]) -> Option<isize> {
     const INPUT: isize = 5;
 
-    let mut runner = OpcodeRunner::new(mem);
+    let mut runner = IntcodeRunner::new(mem);
     runner.set_input_consume_mode(InputMode::SingleInput);
     runner.push_input(INPUT);
 

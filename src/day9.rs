@@ -1,5 +1,5 @@
 use aoc_runner_derive::{aoc, aoc_generator};
-use crate::opcode::{OpcodeRunner};
+use crate::intcode::{IntcodeRunner};
 
 #[aoc_generator(day9)]
 pub fn input_generator(input: &str) -> Vec<isize> {
@@ -14,7 +14,7 @@ pub fn input_generator(input: &str) -> Vec<isize> {
 fn part1(mem: &[isize]) -> isize {
 
     let test_mode = 1;
-    let mut runner = OpcodeRunner::new(mem);
+    let mut runner = IntcodeRunner::new(mem);
 
     let mut outputs: Vec<isize> = Vec::new();
 
@@ -37,7 +37,7 @@ fn part1(mem: &[isize]) -> isize {
 fn part2(mem: &[isize]) -> isize {
 
     let boost_mode = 2;
-    let mut runner = OpcodeRunner::new(mem);
+    let mut runner = IntcodeRunner::new(mem);
 
     let mut outputs: Vec<isize> = Vec::new();
 
