@@ -83,19 +83,6 @@ impl OpcodeRunner {
         }
     }
 
-/// this deconstructs "state" after use and drop()s all of self's old members.
-/// it's basically a move constructor.
-    pub fn load_state(&mut self, state: OpcodeRunner) {
-        self.mem = state.mem;
-        self.extra_mem = state.extra_mem;
-        self.inst_ptr = state.inst_ptr;
-        self.offset = state.offset;
-        self.inputs = state.inputs;
-        self.output = state.output;
-        self.halted = state.halted;
-
-    }
-
     #[allow(dead_code)]
     pub fn print_mem(&mut self) {
         dbg!(&self.mem);
