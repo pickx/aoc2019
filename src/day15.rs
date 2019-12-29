@@ -1,6 +1,6 @@
 use aoc_runner_derive::{aoc, aoc_generator};
 
-use crate::opcode::*;
+use crate::intcode::*;
 use std::collections::HashMap;
 
 #[aoc_generator(day15)]
@@ -73,7 +73,7 @@ fn adjacent_positions_from(pos: Pos) -> Vec<(Pos, isize)>{
         .collect()
 }
 
-fn advance_runner_until_output(runner: &mut OpcodeRunner, input: isize) -> MoveResult {
+fn advance_runner_until_output(runner: &mut IntcodeRunner, input: isize) -> MoveResult {
     runner.push_input(input);
 
     loop {
@@ -91,7 +91,7 @@ fn advance_runner_until_output(runner: &mut OpcodeRunner, input: isize) -> MoveR
 fn dfs(maze: &mut HashMap<Pos, Tile>,
        distances: &mut HashMap<Pos, usize>,
        cur_pos: Pos,
-       mut runner: OpcodeRunner,
+       mut runner: IntcodeRunner,
        code_to_send: isize,
        distance: usize) {
 
@@ -146,7 +146,7 @@ fn find_maze_and_distances(mem: &[isize]) -> (HashMap<Pos, Tile>, HashMap<Pos, u
     let mut distances: HashMap<Pos, usize> = HashMap::new();
     distances.insert(starting_position, 0);
 
-    let mut runner = OpcodeRunner::new(mem);
+    let mut runner = IntcodeRunner::new(mem);
     runner.set_input_consume_mode(InputMode::SingleInput);
 
     for (position, code) in adjacent_positions_from(starting_position) {

@@ -1,6 +1,6 @@
 use aoc_runner_derive::{aoc, aoc_generator};
 use std::collections::{HashMap, VecDeque};
-use crate::opcode::*;
+use crate::intcode::*;
 use std::io;
 
 #[aoc_generator(day13)]
@@ -75,7 +75,7 @@ fn create_screen() -> Vec<Vec<Tile>>{
 //runner restart when Opcode 0 is received, however the memory remains,
 //in other words, touching the floor no longer loses the game.
 //so it plays itself.
-fn play(runner: OpcodeRunner) -> isize {
+fn play(runner: IntcodeRunner) -> isize {
 
     let mut runner = runner;
     let mut screen = create_screen();
@@ -144,7 +144,7 @@ pub fn part1(mem: &[isize]) -> usize {
     let mut tiles: HashMap<Pos, Tile> = HashMap::new();
     let mut buf = VecDeque::with_capacity(3);
 
-    let mut runner = OpcodeRunner::new(mem);
+    let mut runner = IntcodeRunner::new(mem);
 
     loop {
         while buf.len() < 3 {
@@ -186,7 +186,7 @@ pub fn part2(mem: &[isize]) -> isize {
     //"Memory address 0 represents the number of quarters that have been inserted; set it to 2 to play for free."
     mem[0] = 2;
 
-    let runner = OpcodeRunner::new(&mem);
+    let runner = IntcodeRunner::new(&mem);
 
     play(runner) //games plays itself, ends up returning the final score
 
