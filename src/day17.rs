@@ -1,6 +1,7 @@
 use aoc_runner_derive::{aoc, aoc_generator};
 use crate::intcode::IntcodeRunner;
-use itertools::all;
+use itertools::{all, Itertools};
+use std::io;
 
 #[aoc_generator(day17)]
 pub fn input_generator(input: &str) -> Vec<isize> {
@@ -52,7 +53,7 @@ fn get_camera_image(mem: &[isize]) -> Vec<Vec<char>> {
     image
 }
 
-fn _draw(image: Vec<Vec<char>>) {
+fn _draw(image: &Vec<Vec<char>>) {
     for row in image {
         for c in row {
             print!("{}", c);
@@ -112,11 +113,143 @@ fn find_scaffold_intersections(image: Vec<Vec<char>>) -> Vec<Pos> {
 fn part1(mem: &[isize]) -> usize {
     let image = get_camera_image(mem);
 
-//    _draw(image);
+    _draw(&image);
 
     let intersections = find_scaffold_intersections(image);
 
     intersections
         .iter()
         .fold(0, |acc, &Pos { row, col }| acc + (row * col))
+}
+
+#[derive(Clone, Copy, Eq, PartialEq, Hash, Debug)]
+pub enum Direction {
+    Up,
+    Down,
+    Left,
+    Right,
+}
+
+impl Direction {
+
+    fn y_dir(&self) -> isize {
+        match self {
+            Direction::Up => -1,
+            Direction::Down => 1,
+            _ => 0,
+        }
+    }
+
+    fn x_dir(&self) -> isize {
+        match self {
+            Direction::Right => 1,
+            Direction::Left => -1,
+            _ => 0,
+        }
+    }
+
+
+    fn turn_left(&mut self) {
+        *self = match self {
+            Direction::Up => Direction::Left,
+            Direction::Left => Direction::Down,
+            Direction::Down => Direction::Right,
+            Direction::Right => Direction::Up,
+        };
+    }
+
+    fn turn_right(&mut self) {
+        *self = match self {
+            Direction::Up => Direction::Right,
+            Direction::Right => Direction::Down,
+            Direction::Down => Direction::Left,
+            Direction::Left => Direction::Up,
+        };
+    }
+
+    fn draw(&self) -> char {
+        match self {
+            Direction::Up => '^',
+            Direction::Down => 'v',
+            Direction::Left => '<',
+            Direction::Right => '>',
+        }
+    }
+}
+
+fn interactive_step(mut image: Vec<Vec<char>>) {
+    let pos = {
+        let mut pos = None;
+
+        'outer: for row in 0..image.len() {
+            for col in 0..image[0].len() {
+                if image[row][col] == '^' {
+                    pos = Some(Pos { row, col });
+                    break 'outer;
+                }
+            }
+        }
+        pos
+    };
+
+    let mut pos = pos.expect("Robot position not found");
+
+    let mut dir = Direction::Up;
+
+
+    loop {
+        image[pos.row][pos.col] = dir.draw();
+        _draw(&image);
+        let mut input = String::new();
+        match io::stdin().read_line(&mut input) {
+            Ok(_) => (),
+            Err(_e) => panic!(_e.to_string()),
+        }
+
+        let mut chars = input.chars();
+        let first_char = chars.next();
+        let steps = chars.dropping_back(1).as_str().parse::<usize>();
+        if first_char.is_none() || steps.is_err() {
+            println!("Wrong input: steps or first_char. input was {}", input);
+            continue;
+        }
+
+        match first_char.unwrap() {
+            'L' => dir.turn_left(),
+            'R' => dir.turn_right(),
+            _ => {
+                println!("Wrong input: first_char");
+                continue;
+            }
+        };
+
+        pos = {
+            let (mut r, mut c) = (pos.row as isize, pos.col as isize);
+            for _ in 0..steps.unwrap() {
+                image[r as usize][c as usize] = 'X';
+                r += dir.y_dir();
+                c += dir.x_dir();
+            }
+
+            Pos { row: r as usize, col: c as usize}
+        };
+
+    }
+
+}
+#[aoc(day17, part2)]
+fn part2(mem: &[isize]) -> usize {
+
+    //Force the vacuum robot to wake up by changing the value in your ASCII program at address 0 from 1 to 2
+//    let mut mem = mem.to_vec();
+//    mem[0] = 2;
+
+    let image = get_camera_image(mem);
+    interactive_step(image);
+
+//possible solution
+    //L12, L10, L8, L12, R8
+
+
+    0
 }
