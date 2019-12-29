@@ -2,8 +2,6 @@ use aoc_runner_derive::{aoc, aoc_generator};
 
 use crate::opcode::*;
 use std::collections::HashMap;
-use std::convert::TryFrom;
-use crate::day15::MoveResult::{MoveSuccess, HitWall};
 
 #[aoc_generator(day15)]
 pub fn input_generator(input: &str) -> Vec<isize> {
@@ -16,58 +14,14 @@ pub fn input_generator(input: &str) -> Vec<isize> {
 
 #[derive(Clone, Copy, Eq, PartialEq)]
 enum Tile {
-    Robot,
     Wall,
     Empty,
     OxygenSystem,
 }
 
-impl TryFrom<&Tile> for char {
-    type Error = &'static str;
-
-    fn try_from(t: &Tile) -> Result<char, Self::Error> {
-
-        match t {
-            Tile::Robot => Ok('D'),
-            Tile::Wall => Ok('#'),
-            Tile::Empty => Ok('.'),
-            Tile::OxygenSystem => Ok('O'),
-        }
-    }
-}
-
 type Pos = (isize, isize); // (x,y ) position relative to starting point (0, 0)
 
 
-//no longer used now that I've removed interactive play mode (fun is no longer allowed...)
-fn image(maze: &HashMap<Pos, Tile>, robot_pos: Pos) -> Vec<Vec<char>> {
-    let unexplored: char = ' ';
-    let dist: isize = 3;
-    let image_dim = 2 * (dist as usize) + 1;
-    let mut image = vec![vec![unexplored; image_dim]; image_dim];
-
-    let (rob_x, rob_y) = (robot_pos.0, robot_pos.1);
-
-    for (row, y) in ((rob_y - dist)..=(rob_y + dist)).enumerate() {
-            for (col, x) in ((rob_x - dist)..=(rob_x + dist)).enumerate() {
-                if let Some(tile) = maze.get(&(x, y)) {
-                    image[row][col] = char::try_from(tile).unwrap();
-                }
-            }
-        }
-    image
-}
-
-//no longer used now that I've removed interactive play mode (fun is no longer allowed...)
-fn _draw(image: Vec<Vec<char>>) {
-    for row in image {
-        for c in row {
-            print!("{}", c);
-        }
-
-        println!();
-    }
-}
 
 
 #[derive(Clone, Copy, Eq, PartialEq)]
@@ -78,7 +32,7 @@ enum MoveResult {
 }
 
 impl MoveResult {
-    fn to_corresponding_tile(&self) -> Tile {
+    fn to_corresponding_tile(self) -> Tile {
         match self {
             MoveResult::HitWall => Tile::Wall,
             MoveResult::MoveSuccess => Tile::Empty,
@@ -109,7 +63,7 @@ impl From<MoveResult> for isize {
     }
 }
 
-fn movement_code_to_direction(movement_code: isize) -> Pos {
+fn _movement_code_to_direction(movement_code: isize) -> Pos {
     match movement_code {
         1 => (0, -1),
         2 => (0, 1),
@@ -120,7 +74,7 @@ fn movement_code_to_direction(movement_code: isize) -> Pos {
 }
 
 
-fn positions_from(pos: Pos) -> Vec<(Pos, isize)>{
+fn adjacent_positions_from(pos: Pos) -> Vec<(Pos, isize)>{
     let (x, y) = (pos.0, pos.1);
 
     let positions = [(x, y - 1), (x, y + 1), (x - 1, y), (x + 1, y)];
@@ -133,7 +87,6 @@ fn positions_from(pos: Pos) -> Vec<(Pos, isize)>{
 
 fn advance_runner_until_output(runner: &mut OpcodeRunner, input: isize) -> MoveResult {
     runner.push_input(input);
-    let got_output = false;
 
     loop {
         let next_opcode = runner.parse_cur_opcode();
@@ -189,8 +142,7 @@ fn dfs(maze: &mut HashMap<Pos, Tile>,
     }
 
 
-    let adjacent_positions = positions_from(cur_pos);
-    for (position, code) in adjacent_positions {
+    for (position, code) in adjacent_positions_from(cur_pos) {
         dfs(maze, distances, position, runner.clone(),code, distance + 1);
     }
 
@@ -209,9 +161,7 @@ fn find_maze_and_distances(mem: &[isize]) -> (HashMap<Pos, Tile>, HashMap<Pos, u
     let mut runner = OpcodeRunner::new(mem);
     runner.set_input_consume_mode(InputMode::SingleInput);
 
-
-    let adjacent_positions = positions_from(starting_position);
-    for (position, code) in adjacent_positions {
+    for (position, code) in adjacent_positions_from(starting_position) {
         dfs(&mut maze, &mut distances, position, runner.clone(),code, 1);
     }
 
@@ -230,9 +180,7 @@ fn find_oxygen_spread_times(maze: &HashMap<Pos, Tile>,
     let keep_searching_from_this_pos = |pos| find_oxygen_spread_times(maze, oxygen_spread_time, pos, timestamp + 1);
 
     //wow look how terse and functional my code is!!!!
-    //definitely not unnecessarily obfuscated and confusing
-    //I mean, at least I enjoyed writing it
-    positions_from(cur_pos)
+    adjacent_positions_from(cur_pos)
         .iter()
         .map(|&(pos, _)| pos)
         .filter(|pos| maze[pos] == Tile::Empty)
@@ -270,5 +218,5 @@ pub fn part2(mem: &[isize]) -> Option<usize> {
     oxygen_spread_time
         .values()
         .max()
-        .and_then(|&n| Some(n))
+        .copied()
 }
