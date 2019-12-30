@@ -177,7 +177,7 @@ impl Direction {
     }
 }
 
-fn interactive_step(mut image: Vec<Vec<char>>) {
+fn _interactive_step(mut image: Vec<Vec<char>>) {
     let pos = {
         let mut pos = None;
 
@@ -195,20 +195,24 @@ fn interactive_step(mut image: Vec<Vec<char>>) {
     let mut pos = pos.expect("Robot position not found");
 
     let mut dir = Direction::Up;
-
+    let mut instructions = Vec::new();
 
     loop {
         image[pos.row][pos.col] = dir.draw();
         _draw(&image);
+        printer(&instructions);
+
         let mut input = String::new();
         match io::stdin().read_line(&mut input) {
             Ok(_) => (),
             Err(_e) => panic!(_e.to_string()),
         }
 
+        input = input.trim_end().to_string();
+
         let mut chars = input.chars();
         let first_char = chars.next();
-        let steps = chars.dropping_back(1).as_str().parse::<usize>();
+        let steps = chars.as_str().parse::<usize>();
         if first_char.is_none() || steps.is_err() {
             println!("Wrong input: steps or first_char. input was {}", input);
             continue;
@@ -217,11 +221,14 @@ fn interactive_step(mut image: Vec<Vec<char>>) {
         match first_char.unwrap() {
             'L' => dir.turn_left(),
             'R' => dir.turn_right(),
+            'S' => break,
             _ => {
                 println!("Wrong input: first_char");
                 continue;
             }
         };
+
+        instructions.push(input);
 
         pos = {
             let (mut r, mut c) = (pos.row as isize, pos.col as isize);
@@ -237,18 +244,21 @@ fn interactive_step(mut image: Vec<Vec<char>>) {
     }
 
 }
+
+fn printer(v: &Vec<String>) {
+    println!("{}", v.join(","));
+}
+
 #[aoc(day17, part2)]
 fn part2(mem: &[isize]) -> usize {
 
-    //Force the vacuum robot to wake up by changing the value in your ASCII program at address 0 from 1 to 2
-//    let mut mem = mem.to_vec();
-//    mem[0] = 2;
+    //part 2 requires changing memory address 0 from 1 to 2.
+    let mut mem = mem.to_vec();
+    mem[0] = 2;
+    let mut runner = IntcodeRunner::new(&mem);
 
-    let image = get_camera_image(mem);
-    interactive_step(image);
-
-//possible solution
-    //L12, L10, L8, L12, R8
+    //the following solutions were worked out by hand.
+    let main_movement = ""
 
 
     0
