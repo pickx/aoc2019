@@ -258,29 +258,19 @@ fn part2(mem: &[isize]) -> Option<isize> {
     let mut runner = IntcodeRunner::new(&mem);
 
     //the following solutions were worked out by hand.
-    let main_movement_routine = b"A,B,A,B,C,C,B,A,B,C";
-    let a = b"L,12,L,10,R,8,L,12";
-    let b = b"R,8,R,10,R,12";
-    let c = b"L,10,R,12,R,8";
-
-    let video_feed_preference = b'n';
+    let main_movement_routine = "A,B,A,B,C,C,B,A,B,C";
+    let a = "L,12,L,10,R,8,L,12";
+    let b = "R,8,R,10,R,12";
+    let c = "L,10,R,12,R,8";
+    let video_feed_preference = "n";
 
     let newline: u8 = 10;
 
-    let mut total_input = Vec::new();
-    total_input.extend_from_slice(main_movement_routine);
-    total_input.push(newline);
-    total_input.extend_from_slice(a);
-    total_input.push(newline);
-    total_input.extend_from_slice(b);
-    total_input.push(newline);
-    total_input.extend_from_slice(c);
-    total_input.push(newline);
-    total_input.push(video_feed_preference);
-    total_input.push(newline);
-
-    for input_u8 in total_input {
-        runner.push_input_front(input_u8 as isize);
+    for &input_str in [main_movement_routine, a, b, c, video_feed_preference].iter() {
+        for ch in input_str.chars() {
+            runner.push_input_front(ch as isize);
+        }
+        runner.push_input_front(newline as isize);
     }
 
     let mut last_output = None;
