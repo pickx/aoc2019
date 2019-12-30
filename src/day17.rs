@@ -104,8 +104,6 @@ fn find_scaffold_intersections(image: Vec<Vec<char>>) -> Vec<Pos> {
         }
     }
 
-
-
     intersections
 }
 
@@ -200,7 +198,7 @@ fn _interactive_step(mut image: Vec<Vec<char>>) {
     loop {
         image[pos.row][pos.col] = dir.draw();
         _draw(&image);
-        printer(&instructions);
+        _printer(&instructions);
 
         let mut input = String::new();
         match io::stdin().read_line(&mut input) {
@@ -245,7 +243,7 @@ fn _interactive_step(mut image: Vec<Vec<char>>) {
 
 }
 
-fn printer(v: &Vec<String>) {
+fn _printer(v: &Vec<String>) {
     println!("{}", v.join(","));
 }
 
