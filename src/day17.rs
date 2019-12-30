@@ -1,5 +1,5 @@
 use aoc_runner_derive::{aoc, aoc_generator};
-use crate::intcode::IntcodeRunner;
+use crate::intcode::{IntcodeRunner, Opcode};
 use itertools::{all, Itertools};
 use std::io;
 
@@ -113,7 +113,7 @@ fn find_scaffold_intersections(image: Vec<Vec<char>>) -> Vec<Pos> {
 fn part1(mem: &[isize]) -> usize {
     let image = get_camera_image(mem);
 
-    _draw(&image);
+//    _draw(&image);
 
     let intersections = find_scaffold_intersections(image);
 
@@ -250,7 +250,7 @@ fn printer(v: &Vec<String>) {
 }
 
 #[aoc(day17, part2)]
-fn part2(mem: &[isize]) -> usize {
+fn part2(mem: &[isize]) -> Option<isize> {
 
     //part 2 requires changing memory address 0 from 1 to 2.
     let mut mem = mem.to_vec();
@@ -258,8 +258,43 @@ fn part2(mem: &[isize]) -> usize {
     let mut runner = IntcodeRunner::new(&mem);
 
     //the following solutions were worked out by hand.
-    let main_movement = ""
+    let main_movement_routine = b"A,B,A,B,C,C,B,A,B,C";
+    let a = b"L,12,L,10,R,8,L,12";
+    let b = b"R,8,R,10,R,12";
+    let c = b"L,10,R,12,R,8";
 
+    let video_feed_preference = b'n';
 
-    0
+    let newline: u8 = 10;
+
+    let mut total_input = Vec::new();
+    total_input.extend_from_slice(main_movement_routine);
+    total_input.push(newline);
+    total_input.extend_from_slice(a);
+    total_input.push(newline);
+    total_input.extend_from_slice(b);
+    total_input.push(newline);
+    total_input.extend_from_slice(c);
+    total_input.push(newline);
+    total_input.push(video_feed_preference);
+    total_input.push(newline);
+
+    for input_u8 in total_input {
+        runner.push_input_front(input_u8 as isize);
+    }
+
+    let mut last_output = None;
+    while !runner.has_halted() {
+        let next_opcode = runner.parse_cur_opcode();
+
+        let got_output = runner.exec_opcode(next_opcode);
+
+        if got_output {
+            let output = runner.output().unwrap();
+            last_output = Some(output);
+        }
+
+    }
+
+    last_output
 }
