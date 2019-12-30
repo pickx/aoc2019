@@ -31,11 +31,8 @@ pub fn input_generator(input: &str) -> Vec<isize> {
 //            runner.push_input(input.unwrap());
 //        }
 
-#[aoc(day19, part1)]
-fn part1(mem: &[isize]) -> usize {
-
-    let (area_rows, area_cols) = (50, 50);
-    let mut area = vec![vec![0; area_cols]; area_rows];
+fn affected_points_in_area(area_rows: usize, area_cols: usize, mem: &[isize]) -> Vec<Vec<bool>> {
+    let mut area = vec![vec![false; area_cols]; area_rows];
 
     for row in 0..area_rows {
         for col in 0..area_cols {
@@ -49,18 +46,25 @@ fn part1(mem: &[isize]) -> usize {
 
                 if got_output {
                     let output = runner.output().unwrap();
-                    area[row][col] = output;
+                    area[row][col] = output == 1;
                 }
             }
         }
     }
 
+    area
+}
 
+#[aoc(day19, part1)]
+fn part1(mem: &[isize]) -> usize {
+
+    let (area_rows, area_cols) = (50, 50);
+    let area = affected_points_in_area(area_rows, area_cols, mem);
 
     area
         .iter()
         .flatten()
-        .filter(|&&v| v == 1)
+        .filter(|&&b| b)
         .count()
 }
 
