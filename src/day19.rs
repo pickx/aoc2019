@@ -105,6 +105,7 @@ fn row_of_beam_bottom(cols_from_origin: usize, mem: &[isize]) -> usize {
     beam_bottom
 }
 
+//optimization of above algorithm for sequential calls
 //note that this only works for large enough n, probably n > 20 is safe
 fn row_of_beam_bottom_with_hint(cols_from_origin: usize, bottom_for_previous_col: usize, mem: &[isize]) -> usize {
     let col = cols_from_origin;
@@ -123,54 +124,26 @@ fn row_of_beam_bottom_with_hint(cols_from_origin: usize, bottom_for_previous_col
 
 #[aoc(day19, part2)]
 fn part2(mem: &[isize]) -> usize {
-    //we need to have the top right corner fit inside the beam
-    //and the top left, and the bottom left.
-    //the bottom right must also fit due to the shape (beam gets wider as it travels away from the emitter)
-
+    //we need to have the bottom left corner fit inside the beam, and the top right.
+    //the other 2 corners must also fit due to the shape of the beam, no need to check.
 
     let square_side = 100;
-    let mut near_col = 0;
 
-    for bottom_row in square_side.. {
-        while !is_point_affected(bottom_row, near_col, mem) {
-            near_col += 1;
-        }
+    let mut prev_bottom = row_of_beam_bottom(square_side - 1, mem);
 
-        let (top_row, far_col) = (bottom_row - square_side, near_col + square_side);
-        if is_point_affected(top_row, near_col, mem) && is_point_affected(top_row, far_col, mem) && is_point_affected(bottom_row, far_col, mem) {
+    for near_col in square_side.. {
+        let bottom_row = row_of_beam_bottom_with_hint(near_col, prev_bottom, mem);
+        prev_bottom = bottom_row;
 
+        // note that we use (square_side - 1) and not square_side!
+        let top_row = bottom_row - (square_side - 1);
+        let far_col = near_col + (square_side - 1);
+
+        if is_point_affected(bottom_row, near_col, mem) && is_point_affected(top_row, far_col, mem) {
+            //found it
             return (near_col * 10000) + top_row;
         }
     }
-//
-//    let search_start = 120; //impossible to find it any earlier
-//    let mut prev_bottom = row_of_beam_bottom(search_start - 1, mem);
-//    for cols_from_origin in search_start.. {
-////        let bottom_row = row_of_beam_bottom_with_hint(cols_from_origin, prev_bottom, mem);
-//        let bottom_row = row_of_beam_bottom_with_hint(cols_from_origin, prev_bottom, mem);
-//
-//        prev_bottom = bottom_row;
-//
-////        dbg!(bottom_row, cols_from_origin);
-//
-//        let (top_row, farthest_col) = (bottom_row - square_side, cols_from_origin + square_side);
-//
-//        if is_point_affected(top_row, cols_from_origin, mem) &&
-//            is_point_affected(top_row, farthest_col, mem) &&
-//            is_point_affected(bottom_row, farthest_col, mem) {
-//
-//            //found it
-//            println!("Found at ({},{})", cols_from_origin, top_row);
-//            let mut min_row = top_row;
-//            for row in top_row..=bottom_row {
-//                if
-//            }
-//
-//            return (cols_from_origin * 10000) + top_row;
-//
-//        }
-//
-//    }
 
     unreachable!()
 }
