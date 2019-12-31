@@ -138,9 +138,8 @@ fn part2(mem: &[isize]) -> usize {
 
         let (top_row, far_col) = (bottom_row - square_side, near_col + square_side);
         if is_point_affected(top_row, near_col, mem) && is_point_affected(top_row, far_col, mem) && is_point_affected(bottom_row, far_col, mem) {
-            let test_col = near_col - 4;
-            let test_row = top_row - 5;
-            return (test_col * 10000) + test_row;
+
+            return (near_col * 10000) + top_row;
         }
     }
 //
