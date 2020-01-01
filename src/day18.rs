@@ -86,13 +86,13 @@ pub fn part1(maze: &Vec<Vec<char>>) -> usize {
     let mut cur_pos = find_entrance(&maze);
 
     let doors = |hm: &HashMap<char, _>| hm.keys().filter(|&&c| c.is_uppercase());
-    let keys = |hm: HashMap<char, _>| hm.keys().filter(|&&c| c.is_lowercase());
+    let keys = |hm: &HashMap<char, _>| hm.keys().filter(|&&c| c.is_lowercase());
 
     let mut distances_walked: Vec<usize> = Vec::new();
 
     while !reachable_objects.is_empty() {
         let mut keys_to_consider: Vec<char> = Vec::new();
-        for &door in doors(&reachable_objects) {
+        for &key in keys(&reachable_objects) {
             let ref matching_key = door.to_ascii_lowercase();
             if reachable_objects.contains_key(matching_key) {
                 keys_to_consider.push(*matching_key);

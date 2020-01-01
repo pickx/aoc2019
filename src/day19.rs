@@ -78,7 +78,7 @@ fn row_of_beam_bottom(cols_from_origin: usize, previous_bottom: Option<usize>, m
 
     let col = cols_from_origin;
 
-    let compute_beam_bottom_from_scratch = || {
+    let compute_beam_top_from_scratch = || {
         let mut beam_top = 0;
         while !is_point_affected(beam_top, col, mem) {
             beam_top += 1;
@@ -86,8 +86,9 @@ fn row_of_beam_bottom(cols_from_origin: usize, previous_bottom: Option<usize>, m
         beam_top
     };
 
-    let mut beam_bottom = previous_bottom.unwrap_or_else(compute_beam_bottom_from_scratch);
+    let beam_top = previous_bottom.unwrap_or_else(compute_beam_top_from_scratch);
 
+    let mut beam_bottom = beam_top;
     while is_point_affected(beam_bottom, col, mem) {
         beam_bottom += 1;
     }
