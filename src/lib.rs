@@ -25,8 +25,8 @@ mod intcode;
 //mod day15;
 //mod day16;
 //mod day17;
-//mod day18;
-mod day19;
+mod day18;
+//mod day19;
 
 
 aoc_lib! { year = 2019 }
