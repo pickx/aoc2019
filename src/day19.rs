@@ -118,7 +118,7 @@ fn part2(mem: &[isize]) -> usize {
             return (near_col * 10000) + top_row;
         }
     }
-    
+
     unreachable!()
 }
 
